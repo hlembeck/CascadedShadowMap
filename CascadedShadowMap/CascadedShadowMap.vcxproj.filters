@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Shared">
+      <UniqueIdentifier>{a60e9a06-b748-4250-8cdc-c887277f4b8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shared">
+      <UniqueIdentifier>{48b07fe0-b9df-4940-b058-32a2f5ff0ba0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{f792f0b0-d6b8-4164-bcf2-d5a9efc7a006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render">
+      <UniqueIdentifier>{691e9207-9edc-4499-9bb4-c8c596e19c55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render">
+      <UniqueIdentifier>{9622560c-cfd5-43e4-9ed0-557d8c9865b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render\RenderBase">
+      <UniqueIdentifier>{9a1717c8-b416-460e-bc86-9d9d0ebaada1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render\RenderBase">
+      <UniqueIdentifier>{3af98014-faa1-421b-9046-773deccfd621}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render\Draw">
+      <UniqueIdentifier>{c0866b58-4447-45fd-b620-18c2a0fb7179}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render\Draw">
+      <UniqueIdentifier>{9f9f2b60-8661-43d3-84c4-21e79dbde8ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Static">
+      <UniqueIdentifier>{8fca87f1-518b-4a2d-94b2-1eefbf9bde41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Dynamic">
+      <UniqueIdentifier>{f59b6eb5-8a5d-42e8-a378-16232b770313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Static\Terrain">
+      <UniqueIdentifier>{1a230b1d-7533-4081-9f6b-b2a630079d1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Terrain">
+      <UniqueIdentifier>{bbd4d959-0ba5-469b-91af-777bf4cce32e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shared">
+      <UniqueIdentifier>{acd64b8f-aea2-4242-a088-043ecaddbb6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Application">
+      <UniqueIdentifier>{5e8242e3-1a44-4708-bb0c-191195a9ed41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{2dee35bd-8202-4308-b30e-56fd13abaf8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shadow">
+      <UniqueIdentifier>{6f05b299-8218-494a-8514-50509f1e502c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Player">
+      <UniqueIdentifier>{16c9db07-9cef-4869-a20c-746539dd3309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Player">
+      <UniqueIdentifier>{275a124c-e069-402e-975a-2081fe599dd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{f9e0adb2-df6a-4400-8c54-2f796b1ec4ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Dynamic">
+      <UniqueIdentifier>{b6595099-93fd-479f-b727-b991bd589490}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Static">
+      <UniqueIdentifier>{11db89c8-1a00-4ecd-8416-361a7607d234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Static\Terrain">
+      <UniqueIdentifier>{26e9da57-4c42-496c-ad9b-75509e565afa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Header Files\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="DXBase.h">
+      <Filter>Header Files\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Shared.h">
+      <Filter>Header Files\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineObjects.h">
+      <Filter>Header Files\Render\RenderBase</Filter>
+    </ClInclude>
+    <ClInclude Include="RootSignatures.h">
+      <Filter>Header Files\Render\RenderBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorHeaps.h">
+      <Filter>Header Files\Render\RenderBase</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticShapes.h">
+      <Filter>Header Files\Scene\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicShadow.h">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainHeightmap.h">
+      <Filter>Header Files\Scene\Static\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkedTerrain.h">
+      <Filter>Header Files\Scene\Static\Terrain</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DXBase.cpp">
+      <Filter>Source Files\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineObjects.cpp">
+      <Filter>Source Files\Render\RenderBase</Filter>
+    </ClCompile>
+    <ClCompile Include="RootSignatures.cpp">
+      <Filter>Source Files\Render\RenderBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorHeaps.cpp">
+      <Filter>Source Files\Render\RenderBase</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticShapes.cpp">
+      <Filter>Source Files\Scene\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicShadow.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkedTerrain.cpp">
+      <Filter>Source Files\Scene\Static\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainHeightmap.cpp">
+      <Filter>Source Files\Scene\Static\Terrain</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="HeightmapTerrain.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BRDF.hlsl">
+      <Filter>Resource Files\Shared</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BasicDirectionalLight.hlsl">
+      <Filter>Resource Files\Shared</Filter>
+    </CustomBuild>
+    <CustomBuild Include="LocalIllumination.hlsl">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Constants.hlsl">
+      <Filter>Resource Files\Shared</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BasicShadow.hlsl">
+      <Filter>Resource Files\Shadow</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ClipmapUpsample.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BlockTerrainGen.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ChunkTerrainRender.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BasicShadowTerrain.hlsl">
+      <Filter>Resource Files\Shadow</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Geometries.geom" />
+  </ItemGroup>
+</Project>
