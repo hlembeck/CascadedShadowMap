@@ -36,5 +36,9 @@ struct TileInformation {
     BOOL IsVisible(BoundingFrustum, XMMATRIX);
     BOOL NeedsUpdate(BoundingFrustum, XMMATRIX);
     XMMATRIX Create(float x, float y, UINT level, XMUINT2 texCoords);
+    void Create(float x, float y);
  };
  ```
+ 
+ 
+
