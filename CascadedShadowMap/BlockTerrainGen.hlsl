@@ -3,23 +3,46 @@
 Texture2D<float2> gTexture : register(t1);
 SamplerState gSampler : register(s0);
 
-cbuffer WorldMatrix : register(b0) {
-	matrix worldMat;
+cbuffer WorldMatrices : register(b0) {
+	matrix worldMatrices[16];
 };
 
 struct VSOutput {
 	float4 pos : SV_POSITION;
 	float4 wPos : WPOS;
+	uint slice : SLICE;
 };
 
-VSOutput VS(float2 pos : POSITION) {
+struct GSOutput {
+	float4 pos : SV_POSITION;
+	float4 wPos : WPOS;
+	uint slice : SV_RenderTargetArrayIndex;
+};
+
+VSOutput VS(float2 pos : POSITION, uint instance : SV_InstanceID) {
 	VSOutput ret = (VSOutput)0;
 	ret.pos = float4(pos, 0.0f, 1.0f);
 	ret.wPos = ret.pos;
 	ret.wPos.xy += 1.0f;
-	ret.wPos.xy *= 127.0f*0.5f; //Scale to [0,127]x[0,127]
-	ret.wPos = mul(ret.wPos,worldMat);
+	ret.wPos.xy *= 63.0f*0.5f; //Scale to [0,63]x[0,63]
+	ret.wPos = mul(ret.wPos,worldMatrices[instance]);
+	ret.slice = instance;
 	return ret;
+}
+
+[maxvertexcount(3)]
+void GS(triangle VSOutput input[3], inout TriangleStream<GSOutput> OutStream) {
+	GSOutput curr = (GSOutput)0;
+	curr.slice = input[0].slice;
+	curr.pos = input[0].pos;
+	curr.wPos = input[0].wPos;
+	OutStream.Append(curr);
+	curr.pos = input[1].pos;
+	curr.wPos = input[1].wPos;
+	OutStream.Append(curr);
+	curr.pos = input[2].pos;
+	curr.wPos = input[2].wPos;
+	OutStream.Append(curr);
 }
 
 float SmoothStep(float x) {
@@ -94,7 +117,7 @@ float GetHeight(float2 pos) {
 	return float4(ret, 0.0f, 0.0f, 0.0f);
 }
 
-float4 PS(VSOutput input) : SV_TARGET
+float4 PS(GSOutput input) : SV_TARGET
 {
 	float height = GetHeight(input.wPos.xy);
 	float3 v1 = float3(1.0f,GetHeight(float2(input.wPos.x+1.0f,input.wPos.y))-height,0.0f);

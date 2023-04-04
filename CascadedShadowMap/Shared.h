@@ -52,10 +52,13 @@ using namespace Microsoft::WRL;
 constexpr UINT MAXINSTANCES = 1024;
 constexpr float FOVY = DirectX::XM_PIDIV4;
 constexpr UINT NMATERIALS = 1; //Corresponds to number of pipeline states used for materials (each "material" is a different pipeline state, as different lighting methods are required).
-constexpr UINT NFRUSTA = 1;
+constexpr UINT NFRUSTA = 4;
 constexpr DirectX::XMVECTOR LIGHTDIR = { 1.0f, -0.5f, 1.0f, 0.0f };
-constexpr float SHADOWBIAS = 0.01f; //Bias to frustum of shadow maps, to avoid having view frustum being too tightly fitted by the shadow map volume.
+//Bias to frustum of shadow maps, to avoid having view frustum being too tightly fitted by the shadow map volume.
+constexpr float SHADOWBIAS = 0.01f;
+//63*2^6 < 2^12 = 4096. We generate terrain on the most detailed scale of 1m grid spacing, and so the terrain is rendered on 4032x4032 "meter" chunks. Then we can have 6 mip levels, where 0 is the raw generated terrain, and 5 is the coarsest terrain (spanned by 63x63 grid). Thus the 5th mipmap should be stored whenever the chunk is visible, and this fits in a single tile of the virtual texture.
 constexpr UINT NTERRAINLEVELS = 1;
+constexpr float TERRAINHEIGHTMAX = 40.0f;
 
 // From DXSampleHelper.h 
 // Source: https://github.com/Microsoft/DirectX-Graphics-Samples

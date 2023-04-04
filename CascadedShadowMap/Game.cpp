@@ -1,8 +1,8 @@
 #include "Game.h"
 
-constexpr float FARZ = 500.0f;
+constexpr float FARZ = 120.0f;
 
-Game::Game(UINT width, UINT height) : DXWindowBase(width,height), TerrainManager(L"test.txt", L"test2.txt") {}
+Game::Game(UINT width, UINT height) : DXWindowBase(width,height) {}
 
 Game::~Game() {}
 
@@ -17,9 +17,11 @@ void Game::OnInit() {
 
     Camera::LoadConstantBuffer(m_device.Get());
     Player::OnInit(FOVY, m_aspectRatio, 0.1f, FARZ);
-    ChunkedTerrain::Init(*this);
     BasicShadow::Load(2048);
     CreateCommandList();
+
+    ImprovedTerrain63::Init(*this);
+
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
     m_commandList->Close();
@@ -57,8 +59,8 @@ void Game::DrawFinal() {
         m_commandList->SetPipelineState(PipelineObjects::m_chunkTerrainRender.Get());
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
         BoundingFrustum frustum;
-        BoundingFrustum::CreateFromMatrix(frustum,Camera::GetProjectionMatrix());
-        ChunkedTerrain::RenderTerrain(frustum, Camera::GetViewMatrix(), m_commandList.Get());
+        BoundingFrustum::CreateFromMatrix(frustum, Camera::GetProjectionMatrix());
+        ImprovedTerrain63::RenderTiles(frustum, Camera::GetViewMatrix(), m_commandList.Get());
 
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         
@@ -112,7 +114,7 @@ void Game::OnRender() {
     m_commandList->SetGraphicsRootSignature(m_gRootSignature.Get());
     ID3D12DescriptorHeap* pHeaps[] = { DescriptorHeaps::GetCBVHeap() };
     m_commandList->SetDescriptorHeaps(1, pHeaps);
-    BasicShadow::DrawShadow(m_commandList.Get(), this, this);
+    BasicShadow::DrawShadow(m_commandList.Get(), this);
 
     m_commandList->RSSetViewports(1, &(DXWindowBase::m_viewport));
     m_commandList->RSSetScissorRects(1, &(DXWindowBase::m_scissorRect));

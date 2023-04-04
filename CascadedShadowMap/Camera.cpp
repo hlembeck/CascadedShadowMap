@@ -15,7 +15,7 @@ Camera::~Camera() {
 }
 
 void Camera::OnInit(float fovY, float aspectRatio, float nearZ, float farZ) {
-	m_position = { 0.0f,0.0f,-10.0f };
+	m_position = { 0.0f,0.0f,0.0f };
 	m_right = { 1.0f,0.0f,0.0f };
 	m_up = { 0.0f,1.0f,0.0f };
 	m_direction = { 0.0f,0.0f,1.0f };

@@ -3,14 +3,14 @@
 #include "PipelineObjects.h"
 #include "Scene.h"
 #include "Player.h"
-#include "ChunkedTerrain.h"
+#include "ImprovedTerrain.h"
 
 class Game :
 	public DXWindowBase,
 	private Scene,
 	private Player,
 	private Time, //Disconnected from Game to allow other classes access to it.
-	private ChunkedTerrain
+	private ImprovedTerrain63
 {
 
 	//Command list & allocator  --  may detach from this class in the future.

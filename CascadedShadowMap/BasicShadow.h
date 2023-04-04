@@ -1,6 +1,5 @@
 #include "DXBase.h"
 #include "Scene.h"
-#include "ChunkedTerrain.h"
 
 class BasicShadow : 
 	public virtual DXBase,
@@ -23,7 +22,7 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE m_dsvHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_cbvHandle;
 	void Load(UINT resolution = 1024);
-	void DrawShadow(ID3D12GraphicsCommandList* commandList, Scene* scene, ChunkedTerrain* terrain);
+	void DrawShadow(ID3D12GraphicsCommandList* commandList, Scene* scene);
 	void UpdateProjections();
 	void Resize(); //Onresize. View volume doesn't need near and far Z, as those are in CameraView
 };

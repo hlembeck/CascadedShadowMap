@@ -11,8 +11,13 @@ cbuffer CameraConstants : register(b0) {
 	float4 position;
 };
 
-cbuffer WorldMatrices : register(b1) {
-	matrix matrices[64];
+struct TileParams {
+	matrix worldMatrix;
+	uint2 texCoordsBase; //Instead of using UV coordinates, direct index into the texture ensures that the texture is accessed at the correct place (still possible with UV coordinates, this is for testing).
+};
+
+cbuffer TileInfo : register(b1) {
+	TileParams tileParams[16];
 };
 
 cbuffer CSMCameras : register(b2) {
@@ -30,18 +35,16 @@ struct VSOutput {
 };
 
 VSOutput VS(float2 pos : POSITION) {
-	static const float granularity = 15.0f;
-	static const float d = 1.0f / 126.0f;
+	//static const float granularity = 15.0f;
+	//static const float d = 1.0f / 62.0f;
 	VSOutput ret = (VSOutput)0;
 	float2 wPos = pos;
-	wPos.y = 126.0f - wPos.y;
-	//ret.wPos = fmod(pos,float2(granularity,granularity));
-	//ret.wPos = pos - ret.wPos;
-	//ret.wPos *= d;
+	wPos.y = 62.0f - wPos.y;
+	wPos += tileParams[i].texCoordsBase;
+	//wPos += float2(64.0f * (i%4), 64.0f * (i/4));
 	float4 terrain = gTerrain.Load(int3(wPos, 0));
-	ret.pos = mul(float4(pos.x, terrain.r, pos.y, 1.0f), matrices[i]);
-	ret.wPos = ret.pos;
-	ret.pos = mul(ret.pos, viewProj);
+	ret.wPos = mul(float4(pos.x, terrain.r, pos.y, 1.0f),tileParams[i].worldMatrix);
+	ret.pos = mul(ret.wPos, viewProj);
 	ret.n = float4(terrain.gba,0.0f);
 	return ret;
 }
@@ -79,5 +82,5 @@ float GetShadowFactor(float4 wPos) {
 
 float4 PS(VSOutput input) : SV_TARGET{
 	input.n = normalize(input.n);
-	return GetShadowFactor(input.wPos) * GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position) * float4(0.1f,0.9f,0.2f,1.0f);
+	return /*GetShadowFactor(input.wPos) * */GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position) /** float4(0.1f,0.9f,0.2f,1.0f)*/;
 }

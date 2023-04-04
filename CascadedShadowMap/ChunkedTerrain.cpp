@@ -2,8 +2,8 @@
 #include "DescriptorHeaps.h"
 
 TerrainManager::TerrainManager(const TCHAR heightmapFilename[], const TCHAR lookupFilename[]) : m_currBlocks(new BlockLookup[9]) {
-	m_hHeightmapFile = CreateFile(heightmapFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-	m_hLookupFile = CreateFile(lookupFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	//m_hHeightmapFile = CreateFile(heightmapFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	//m_hLookupFile = CreateFile(lookupFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
 const BOOL TerrainManager::IsOpen() { 
@@ -148,10 +148,10 @@ void ChunkedTerrain::LoadVertexBuffer() {
 }
 
 void ChunkedTerrain::Init(CameraView view) {
-	if (TerrainManager::IsOpen()) {
+	/*if (TerrainManager::IsOpen()) {
 		printf("File error\n");
 		throw std::exception();
-	}
+	}*/
 	LoadVertexBuffer();
 	//CreateRoots();
 	HeightmapGen::Init();

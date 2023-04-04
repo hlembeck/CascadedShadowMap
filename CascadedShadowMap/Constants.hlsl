@@ -4,7 +4,7 @@ static const float4 LIGHTDIR = normalize(float4(1.0f, -0.5f, 1.0f, 0.0f));
 
 static const uint MAXINSTANCES = 50;
 
-static const uint NFRUSTA = 1;
+static const uint NFRUSTA = 4;
 
 static const matrix MATRIX = {
 	0.1f, 0.0f, 0.0f, 0.0f,

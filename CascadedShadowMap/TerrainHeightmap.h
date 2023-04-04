@@ -34,9 +34,10 @@ class HeightmapGen :
 	D3D12_RECT m_chunkScissorRect;
 	ComPtr<ID3D12Resource> m_cbuffer;
 protected:
-	//Since it is fast to generate the ground level data for an entire chunk at a time (entire 4096x4096 block fits in single texture), we generate by blocks. The geometric error calculations for each level take more time.
-	void GenerateBlock(XMINT2 pos, ComPtr<ID3D12Resource> destResource);
+	//Since it is fast to generate the ground level data for an entire chunk at a time (entire 4096x4096 block fits in single texture, for example), we generate by blocks. The geometric error calculations for each level take more time.
+	void GenerateBlock(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
 	void CreateResources();
+	void CreateConstantBuffer(UINT nRoots);
 	void CreateCommandList();
 	//Refresh the random texture used for generating noise (m_randomTexture)
 	void RefreshTexture();
@@ -46,8 +47,14 @@ protected:
 	//TESTING
 	void GenerateChunk(ChunkGenParams params);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTESTHandle() { return m_randomTextureSRV; };
+
+	//Tiles
+	void GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap);
+
+	//To generate 4032x4032 chunk, which then has mip levels generated.
+	void Generate4KChunk(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
 public:
 	HeightmapGen(const UINT randomResolution = 16) : m_randomResolution(randomResolution) {};
 	void Init();
-	void WaitForList();
+	void WaitForQueue();
 };

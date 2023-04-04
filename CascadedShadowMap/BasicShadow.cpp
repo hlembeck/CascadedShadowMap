@@ -97,7 +97,7 @@ void BasicShadow::Load(UINT resolution) {
 	m_device->CreateShaderResourceView(m_depthMap.Get(), &srvDesc, handles.cpuHandle);
 }
 
-void BasicShadow::DrawShadow(ID3D12GraphicsCommandList* commandList, Scene* scene, ChunkedTerrain* terrain) {
+void BasicShadow::DrawShadow(ID3D12GraphicsCommandList* commandList, Scene* scene) {
 	commandList->RSSetViewports(1, &m_shadowViewport);
 	commandList->RSSetScissorRects(1, &m_shadowScissorRect);
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -109,9 +109,6 @@ void BasicShadow::DrawShadow(ID3D12GraphicsCommandList* commandList, Scene* scen
 	commandList->OMSetRenderTargets(0, NULL, FALSE, &(BasicShadow::m_dsvHandle));
 	commandList->ClearDepthStencilView(BasicShadow::m_dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	scene->DrawBarebones(commandList);
-
-	//Terrain
-	terrain->DrawBarebones(commandList);
 
 	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_depthMap.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	commandList->ResourceBarrier(1, &resourceBarrier);

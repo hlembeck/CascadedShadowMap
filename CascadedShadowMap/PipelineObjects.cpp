@@ -71,7 +71,7 @@ void PipelineObjects::LoadShadowPSO(const D3D12_INPUT_LAYOUT_DESC& layoutDesc) {
         D3D12_FILL_MODE_SOLID,
         D3D12_CULL_MODE_NONE,
         FALSE,
-        10000000,
+        0,
         0.0f, //clamp
         0.0f, //slope scaled
         TRUE,
@@ -182,9 +182,10 @@ void PipelineObjects::LoadBlockTerrainGenPSO() {
 
     ComPtr<ID3DBlob> vertexShader;
     ComPtr<ID3DBlob> pixelShader;
+    ComPtr<ID3DBlob> geometryShader;
     UINT compileFlags = 0;
-
     ThrowIfFailed(D3DCompileFromFile(L"BlockTerrainGen.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_1", compileFlags, 0, &vertexShader, NULL));
+    ThrowIfFailed(D3DCompileFromFile(L"BlockTerrainGen.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS", "gs_5_1", compileFlags, 0, &geometryShader, NULL));
     ThrowIfFailed(D3DCompileFromFile(L"BlockTerrainGen.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_1", compileFlags, 0, &pixelShader, NULL));
 
     D3D12_DEPTH_STENCIL_DESC depthDesc = {
@@ -200,7 +201,7 @@ void PipelineObjects::LoadBlockTerrainGenPSO() {
         CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
         {},
         {},
-        {},
+        CD3DX12_SHADER_BYTECODE(geometryShader.Get()),
         {},
         CD3DX12_BLEND_DESC(D3D12_DEFAULT),
         UINT_MAX,
@@ -218,7 +219,7 @@ void PipelineObjects::LoadBlockTerrainGenPSO() {
         D3D12_PIPELINE_STATE_FLAG_NONE
     };
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+    //psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_blockTerrainGen)));
 }
 

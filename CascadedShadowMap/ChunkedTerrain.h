@@ -78,8 +78,6 @@ Suppose we use a single DX12 resource to store all heightmap data. We'll create 
 If we attach texture coordinates to our vertices, then they will be such that the entire vertex buffer covers exactly the UV coordinate range. When rendering, instance ID is used to transform these coordinates so that they access the correct tile of the reserved texture.
 */
 
-constexpr float TERRAINHEIGHTMAX = 40.0f;
-
 class ChunkedTerrain : public virtual TerrainManager {
 	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;

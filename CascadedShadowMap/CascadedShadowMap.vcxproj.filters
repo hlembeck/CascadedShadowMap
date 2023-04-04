@@ -132,6 +132,9 @@
     <ClInclude Include="ChunkedTerrain.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
+    <ClInclude Include="ImprovedTerrain.h">
+      <Filter>Header Files\Scene\Static\Terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXBase.cpp">
@@ -174,6 +177,9 @@
       <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="TerrainHeightmap.cpp">
+      <Filter>Source Files\Scene\Static\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="ImprovedTerrain.cpp">
       <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
   </ItemGroup>

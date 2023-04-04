@@ -37,8 +37,8 @@ void LoadRandomInstances(ID3D12Device* device, ObjectInstances* pObject, UINT nu
     for (UINT i = 0; i < pObject->nInstances; i++) {
         tVec = {pRand->Get(),pRand->Get(),pRand->Get()};
         tMat = XMMatrixRotationAxis(tVec,XM_PI*(pRand->Get()));
-        matrices[i] = XMMatrixTranspose(XMMatrixMultiply(tMat,XMMatrixTranslation(pRand->Get()*radius, pRand->Get() * radius, pRand->Get() * radius)));
-        //matrices[i] = XMMatrixIdentity();
+        //matrices[i] = XMMatrixTranspose(XMMatrixMultiply(tMat,XMMatrixTranslation(pRand->Get()*radius, pRand->Get() * radius, pRand->Get() * radius)));
+        matrices[i] = XMMatrixIdentity();
     }
 
     BYTE* pData;
@@ -65,7 +65,7 @@ void Scene::Load(ID3D12GraphicsCommandList* commandList) {
 	m_objects[0]->Load(m_device.Get());
 	objInstances.pObject = m_objects[0];
 	objInstances.nInstances = 1;
-	LoadRandomInstances(m_device.Get(), &objInstances, 50, (RandomGenerator*)this, 10.0f);
+	LoadRandomInstances(m_device.Get(), &objInstances, 1, (RandomGenerator*)this, 0.0f);
 
 	m_materials[0].objects.push_back(objInstances);
 }
