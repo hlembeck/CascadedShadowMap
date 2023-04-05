@@ -129,9 +129,6 @@
     <ClInclude Include="TerrainHeightmap.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="ChunkedTerrain.h">
-      <Filter>Header Files\Scene\Static\Terrain</Filter>
-    </ClInclude>
     <ClInclude Include="ImprovedTerrain.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
@@ -172,9 +169,6 @@
     </ClCompile>
     <ClCompile Include="BasicShadow.cpp">
       <Filter>Source Files\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="ChunkedTerrain.cpp">
-      <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="TerrainHeightmap.cpp">
       <Filter>Source Files\Scene\Static\Terrain</Filter>

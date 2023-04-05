@@ -87,17 +87,13 @@ void HeightmapGen::GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices,
 	D3D12_TILED_RESOURCE_COORDINATE tiledCoordinate = {0,0,0};
 
 	D3D12_TILE_REGION_SIZE tileRegionSize = {
-		16,
-		TRUE,
-		4,
-		4,
-		1
+		nMatrices,
+		FALSE
 	};
 
 	D3D12_TILE_RANGE_FLAGS flag = D3D12_TILE_RANGE_FLAG_NONE;
 
 	UINT heapRangeStartOffset = 0;
-	//UINT rangeTileCounts[1] = { 16 };
 
 	m_commandQueue->UpdateTileMappings(
 		destResource,
@@ -162,12 +158,12 @@ void HeightmapGen::GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices,
 		};
 		destLocation.SubresourceIndex = 0;
 
-		//m_commandList->CopyTextureRegion(&destLocation, 0, 0, 0, &srcLocation, NULL);
-
-		for (UINT i = 0; i < 4; i++) {
-			for (UINT j = 0; j < 4; j++) {
-				srcLocation.SubresourceIndex = 4 * i + j;
-				m_commandList->CopyTextureRegion(&destLocation, (i%4)*64, (j%4)*64, 0, &srcLocation, NULL);
+		UINT width = sqrt(nMatrices);
+		printf("width: %d\n", width);
+		for (UINT i = 0; i < width; i++) {
+			for (UINT j = 0; j < width; j++) {
+				srcLocation.SubresourceIndex = width * i + j;
+				m_commandList->CopyTextureRegion(&destLocation, (i%width)*64, (j%width)*64, 0, &srcLocation, NULL);
 			}
 		}
 	}
@@ -182,7 +178,7 @@ void HeightmapGen::GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices,
 	WaitForQueue();
 }
 
-void HeightmapGen::CreateResources() {
+void HeightmapGen::CreateResources(UINT16 nRoots) {
 	D3D12_RESOURCE_DESC desc;
 	//Random texture
 	{
@@ -256,7 +252,7 @@ void HeightmapGen::CreateResources() {
 			0,
 			63,
 			63,
-			16,
+			nRoots,
 			1,
 			DXGI_FORMAT_R32G32B32A32_FLOAT,
 			{1,0},
@@ -395,7 +391,7 @@ void HeightmapGen::RefreshTexture() {
 	}
 }
 
-void HeightmapGen::CreateCoarseTerrainRTV() {
+void HeightmapGen::CreateCoarseTerrainRTV(UINT16 nRoots) {
 	D3D12_RENDER_TARGET_VIEW_DESC desc = {
 		DXGI_FORMAT_R32G32B32A32_FLOAT,
 		D3D12_RTV_DIMENSION_TEXTURE2DARRAY
@@ -403,7 +399,7 @@ void HeightmapGen::CreateCoarseTerrainRTV() {
 	desc.Texture2DArray = {
 		0,
 		0,
-		16,
+		nRoots,
 		0
 	};
 
@@ -506,12 +502,12 @@ void HeightmapGen::WaitForQueue() {
 	m_fence->Signal(0);
 }
 
-void HeightmapGen::Init() {
+void HeightmapGen::Init(UINT nRoots) {
 	CreateCommandList();
 	//TerrainMipmap::Init(m_commandAllocator.Get(), m_commandList.Get());
 	WaitForQueue();
-	CreateResources();
-	CreateCoarseTerrainRTV();
+	CreateResources(nRoots);
+	CreateCoarseTerrainRTV(nRoots);
 	FillCoarseVertexBuffer();
 	RefreshTexture();
 

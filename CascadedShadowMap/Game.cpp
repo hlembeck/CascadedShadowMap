@@ -1,6 +1,6 @@
 #include "Game.h"
 
-constexpr float FARZ = 120.0f;
+constexpr float FARZ = 180.0f;
 
 Game::Game(UINT width, UINT height) : DXWindowBase(width,height) {}
 

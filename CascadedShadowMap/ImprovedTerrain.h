@@ -7,19 +7,24 @@ struct TileParams {
 	XMUINT2 texCoords;
 };
 
+struct TileInformation {
+	BoundingBox bounds;
+	TileParams tileParams;
+	INT isResident;
+};
+
 class Tile {
-	BoundingBox m_bounds;
-	XMMATRIX m_worldMatrix; //Map from [0,63]x[0,63] -> world coordinates
-	XMUINT2 m_texCoords;
-	INT m_isResident;
+	TileInformation m_tileInfo;
 public:
 	Tile();
-	Tile(BoundingBox bounds, XMMATRIX worldMatrix, XMUINT2 texCoords, INT isResident);
+	Tile(TileInformation tileInfo);
 	void SetTexCoords(XMUINT2 coords, INT isResident);
 	BOOL IsVisible(BoundingFrustum frustum, XMMATRIX viewMatrix);
 	BOOL NeedsUpdate(BoundingFrustum frustum, XMMATRIX viewMatrix);
 	//(x,y) are coordinates of the bottom left of the tile, so that the tile spans (x,y) to (x+62*2^(MAXLEVELS-level-1),y+62*2^(MAXLEVELS-level-1))
-	XMMATRIX Create(float x, float y, UINT level, XMUINT2 texCoords);
+	XMMATRIX Create(float x, float y, XMUINT2 texCoords, INT isRresident);
+	//Create tile from the bottom-left corner (x,y), and worldspace width of the tile.
+	void Create(float x, float y, float width);
 	TileParams GetTileParams();
 };
 
@@ -53,11 +58,8 @@ class ImprovedTerrain63 :
 	ComPtr<ID3D12Heap> m_heap;
 
 	//Quadtree forest on CPU to be traversed each upon camera update (change in position or direction)
-	Tile* m_roots;
+	Tile** m_roots;
 	UINT m_nRoots;
-
-	//Test
-	UINT frameIndex;
 
 	//Constant buffer for the world matrices and UV coordinate starts for tiles.
 	ComPtr<ID3D12Resource> m_constantBuffer;
@@ -70,8 +72,9 @@ class ImprovedTerrain63 :
 
 	//Testing
 	void CreateChunk();
-	void CreateRoots(CameraView view);
+	XMMATRIX* CreateRoots(CameraView view);
 	void CreateConstantBuffer();
+	XMMATRIX CreateTileTree(UINT rootIndex, float x, float y, XMUINT2 texCoords);
 public:
 	ImprovedTerrain63();
 	~ImprovedTerrain63();

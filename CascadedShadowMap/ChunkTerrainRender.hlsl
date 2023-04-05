@@ -17,7 +17,7 @@ struct TileParams {
 };
 
 cbuffer TileInfo : register(b1) {
-	TileParams tileParams[16];
+	TileParams tileParams[36];
 };
 
 cbuffer CSMCameras : register(b2) {
@@ -35,13 +35,10 @@ struct VSOutput {
 };
 
 VSOutput VS(float2 pos : POSITION) {
-	//static const float granularity = 15.0f;
-	//static const float d = 1.0f / 62.0f;
 	VSOutput ret = (VSOutput)0;
 	float2 wPos = pos;
 	wPos.y = 62.0f - wPos.y;
 	wPos += tileParams[i].texCoordsBase;
-	//wPos += float2(64.0f * (i%4), 64.0f * (i/4));
 	float4 terrain = gTerrain.Load(int3(wPos, 0));
 	ret.wPos = mul(float4(pos.x, terrain.r, pos.y, 1.0f),tileParams[i].worldMatrix);
 	ret.pos = mul(ret.wPos, viewProj);

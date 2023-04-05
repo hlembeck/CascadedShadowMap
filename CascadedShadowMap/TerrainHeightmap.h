@@ -36,12 +36,12 @@ class HeightmapGen :
 protected:
 	//Since it is fast to generate the ground level data for an entire chunk at a time (entire 4096x4096 block fits in single texture, for example), we generate by blocks. The geometric error calculations for each level take more time.
 	void GenerateBlock(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
-	void CreateResources();
+	void CreateResources(UINT16 nRoots);
 	void CreateConstantBuffer(UINT nRoots);
 	void CreateCommandList();
 	//Refresh the random texture used for generating noise (m_randomTexture)
 	void RefreshTexture();
-	void CreateCoarseTerrainRTV();
+	void CreateCoarseTerrainRTV(UINT16 nRoots);
 	void FillCoarseVertexBuffer();
 
 	//TESTING
@@ -55,6 +55,6 @@ protected:
 	void Generate4KChunk(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
 public:
 	HeightmapGen(const UINT randomResolution = 16) : m_randomResolution(randomResolution) {};
-	void Init();
+	void Init(UINT nRoots);
 	void WaitForQueue();
 };
