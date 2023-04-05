@@ -18,7 +18,7 @@ struct TileInformation {
 };
 ```
  - `struct TileParams` Tile parameters to be copied into a constant buffer for use in shaders.
-    - `XMMATRIX worldMatrix` World matrix used to map [0,62]x[0,62] in worldspace to the correct bounds for the tile. For a tile of highest spatial extent, this matrix is just a translation. Otherwise, it is a translation composed with a scaling factor of $2^k$, for some integer $k$.
+    - `XMMATRIX worldMatrix` World matrix used to map [0,62]x[0,62] in worldspace to the correct bounds for the tile. In the vertex shader of the screen render stage, it is applied to the world position of a vertex after it has been scaled to the correct tile size (each level in the tree rooted at a max-spanning tile is half the span of the previous level).
     - `XMUINT2 texCoords` Texture coordinates, in texels, of the start of the tile. Since the loading of the texture is done manually at this time, UV coordinates are not used; we index directly into the resource.
  - `BoundingBox bounds` Spatial bounds of the terrain tile. Used to test for intersection with view frustum, using `BoundingBox::Intersects(BoundingFrustum)`.
  - `INT isResident` Integer value in $\{0,1\}$ that determines whether the tile is resident on the GPU. A value of $0$ is not resident, while a value of $1$ indicates that the tile is resident. INT is used instead of BOOL to ensure that the TRUE value is 1.
