@@ -159,7 +159,6 @@ void HeightmapGen::GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices,
 		destLocation.SubresourceIndex = 0;
 
 		UINT width = sqrt(nMatrices);
-		printf("width: %d\n", width);
 		for (UINT i = 0; i < width; i++) {
 			for (UINT j = 0; j < width; j++) {
 				srcLocation.SubresourceIndex = width * i + j;

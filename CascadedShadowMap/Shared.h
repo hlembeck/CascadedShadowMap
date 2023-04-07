@@ -141,6 +141,15 @@ struct CameraView : public virtual AspectRatio {
     XMVECTOR m_direction = {};
 };
 
+//Used to calculate screen space error for a tile in the terrain renderer.
+struct TerrainLODViewParams {
+    XMFLOAT4 position;
+    float tanFOVH; //Actually is tan(fovH/2), as used in Ch. 19 of Real-Time Rendering.
+    float screenWidth;
+    BoundingFrustum frustum;
+    XMMATRIX viewMatrix;
+};
+
 struct Time {
     std::chrono::time_point<std::chrono::high_resolution_clock> m_time;
 };

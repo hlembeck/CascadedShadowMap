@@ -50,6 +50,14 @@ TileParams Tile::GetTileParams() {
 	return m_tileInfo.tileParams;
 }
 
+XMFLOAT4 Tile::GetCircumscribedSphere() {
+	BoundingBox temp = m_tileInfo.bounds;
+	return {
+		temp.Center.x,temp.Center.y ,temp.Center.z,
+		sqrt(temp.Extents.x * temp.Extents.x + temp.Extents.y * temp.Extents.y + temp.Extents.z * temp.Extents.z)
+	};
+}
+
 void ImprovedChunk::Create(float x, float y) {
 	m_bounds = BoundingBox(
 		{ x+ (float)pow(2.0f,NTERRAINLEVELS)*31.0f, 0.0f, y + (float)pow(2.0f,NTERRAINLEVELS) * 31.0f },
@@ -215,6 +223,11 @@ void ImprovedTerrain63::WaitForList() {
 }
 
 void ImprovedTerrain63::Init(CameraView view) {
+	//Set geometric error values.
+	for (UINT i = 0; i < NTERRAINLEVELS; i++) {
+		m_geomErrors[i] = pow(2, i);
+	}
+
 	CreateCommandList();
 	CreateVertexTexture();
 	XMMATRIX* worldMatrices = CreateRoots(view);
@@ -224,36 +237,25 @@ void ImprovedTerrain63::Init(CameraView view) {
 	CreateConstantBuffer(); //Needs m_nRoots
 }
 
-void ImprovedTerrain63::CreateChunk() {
-	m_chunk.Create(0.0f, 0.0f);
-	HeightmapGen::GenerateBlock(XMMatrixIdentity(),m_virtualTexture.Get(),m_heap.Get());
-}
-
-void ImprovedTerrain63::RenderChunk(ID3D12GraphicsCommandList* commandList) {
-	commandList->SetGraphicsRootDescriptorTable(3, m_srvHandle);
-	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	commandList->DrawInstanced(23064, 1, 0, 0);
-}
-
-void ImprovedTerrain63::RenderTiles(BoundingFrustum frustum, XMMATRIX viewMatrix, ID3D12GraphicsCommandList* commandList) {
-	
+void ImprovedTerrain63::RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommandList* commandList) {
 	commandList->SetGraphicsRootDescriptorTable(3, m_srvHandle);
 	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
 	commandList->SetGraphicsRootDescriptorTable(1, m_cbvHandle);
+	std::vector<TileParams> tileParams;
+	for (UINT i = 0; i < m_nRoots; i++) {
+		if (m_roots[i][0].IsVisible(viewParams.frustum, viewParams.viewMatrix)) {
+			tileParams.push_back(m_roots[i][0].GetTileParams());
+		}
+	}
+
 	D3D12_RANGE range = {};
 	BYTE* pData;
-	TileParams temp;
 	m_constantBuffer->Map(0, &range, (void**)&pData);
-	for (UINT i = 0; i < m_nRoots; i++) {
-		temp = m_roots[i][0].GetTileParams();
-		memcpy(pData + sizeof(TileParams) * i, &temp, sizeof(TileParams));
-	}
+	memcpy(pData, tileParams.data(), sizeof(TileParams)*tileParams.size());
 	m_constantBuffer->Unmap(0, nullptr);
-	for (UINT i = 0; i < m_nRoots; i++) {
+	for (UINT i = 0; i < tileParams.size(); i++) {
 		commandList->SetGraphicsRoot32BitConstant(4, i, 0);
-		if (m_roots[i][0].IsVisible(frustum, viewMatrix)) {
-			commandList->DrawInstanced(23064, 1, 0, 0);
-		}
+		commandList->DrawInstanced(23064, 1, 0, 0);
 	}
 }
 
@@ -271,9 +273,8 @@ XMMATRIX* ImprovedTerrain63::CreateRoots(CameraView view) {
 	float rootSpacing = 62.0f*pow(2.0f, NTERRAINLEVELS-1);
 
 	INT chunkWidth = ceil(lengthEdge / rootSpacing); //Number of chunks necessary to span the length-edge
-	m_nRoots = 4 * pow(chunkWidth, 2);
+	m_nRoots = std::min(4 * (INT)pow(chunkWidth, 2),65536); //2^14 max width,height of texture, and there are (2^8)^2=2^16 tiles
 	m_roots = new Tile*[m_nRoots];
-	printf("nRoots: %d\n", m_nRoots);
 	HeightmapGen::CreateConstantBuffer(m_nRoots);
 	
 	XMMATRIX* worldMatrices = new XMMATRIX[m_nRoots];
@@ -335,4 +336,24 @@ XMMATRIX ImprovedTerrain63::CreateTileTree(UINT rootIndex, float x, float y, XMU
 		}
 	}
 	return m_roots[rootIndex][0].Create(x,y,texCoords,1);
+}
+
+float ImprovedTerrain63::GetScreenError(UINT rootIndex, UINT level, TerrainLODViewParams viewParams) {
+	XMFLOAT4 circumSphere = m_roots[rootIndex][level].GetCircumscribedSphere();
+	circumSphere = {circumSphere.x-viewParams.position.x,circumSphere.y- viewParams.position.y,circumSphere.z- viewParams.position.z,circumSphere.w};
+	float d = sqrt(circumSphere.x * circumSphere.x + circumSphere.y * circumSphere.y + circumSphere.z * circumSphere.z) - circumSphere.w;
+	float ret = 0.5f * m_geomErrors[level] * viewParams.screenWidth;
+	ret /= std::max(d,0.0f)*viewParams.tanFOVH;
+	return ret;
+}
+
+void ImprovedTerrain63::GetChunkTileParams(std::vector<TileParams>& tileParams, Tile* pTiles, UINT maxSize, TerrainLODViewParams viewParams) {
+	UINT i = 0;
+	Tile curr;
+	while (tileParams.size() < maxSize) {
+		curr = pTiles[i++];
+		if (curr.IsVisible(viewParams.frustum, viewParams.viewMatrix)) {
+			tileParams.push_back(curr.GetTileParams());
+		}
+	}
 }

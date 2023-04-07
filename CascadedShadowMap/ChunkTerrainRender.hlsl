@@ -17,7 +17,7 @@ struct TileParams {
 };
 
 cbuffer TileInfo : register(b1) {
-	TileParams tileParams[36];
+	TileParams tileParams[819];
 };
 
 cbuffer CSMCameras : register(b2) {

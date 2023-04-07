@@ -45,4 +45,5 @@ public:
 	XMFLOAT4 GetDirection();
 
 	FrustumRays GetRays();
+	float GetTanFOVH();
 };

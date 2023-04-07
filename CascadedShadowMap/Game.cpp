@@ -1,6 +1,6 @@
 #include "Game.h"
 
-constexpr float FARZ = 180.0f;
+constexpr float FARZ = 240.0f;
 
 Game::Game(UINT width, UINT height) : DXWindowBase(width,height) {}
 
@@ -58,9 +58,7 @@ void Game::DrawFinal() {
         //Draw terrain.
         m_commandList->SetPipelineState(PipelineObjects::m_chunkTerrainRender.Get());
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
-        BoundingFrustum frustum;
-        BoundingFrustum::CreateFromMatrix(frustum, Camera::GetProjectionMatrix());
-        ImprovedTerrain63::RenderTiles(frustum, Camera::GetViewMatrix(), m_commandList.Get());
+        ImprovedTerrain63::RenderTiles(GetTerrainLODViewParams(), m_commandList.Get());
 
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         
@@ -165,9 +163,7 @@ void Game::SetCursorPoint(POINT p, HCURSOR hCursor) {
     SetCursor(m_hCursor);
 }
 
-void Game::OnDestroy() {
-    //Renderer::OnDestroy();
-}
+void Game::OnDestroy() {}
 
 void Game::OnResize(const UINT width, const UINT height) {
     m_width = width;
@@ -175,4 +171,16 @@ void Game::OnResize(const UINT width, const UINT height) {
     m_aspectRatio = (float)width / height;
     Camera::SetLens(FOVY, m_aspectRatio, 0.1f, FARZ);
     BasicShadow::Resize();
+}
+
+TerrainLODViewParams Game::GetTerrainLODViewParams() {
+    BoundingFrustum frustum;
+    BoundingFrustum::CreateFromMatrix(frustum, Camera::GetProjectionMatrix());
+    return {
+        Camera::GetPosition(),
+        Camera::GetTanFOVH(),
+        (float)m_width,
+        frustum,
+        m_viewMatrix
+    };
 }

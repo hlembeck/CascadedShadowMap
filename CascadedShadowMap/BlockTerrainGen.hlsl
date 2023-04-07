@@ -4,7 +4,7 @@ Texture2D<float2> gTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 cbuffer WorldMatrices : register(b0) {
-	matrix worldMatrices[36];
+	matrix worldMatrices[820];
 };
 
 struct VSOutput {
@@ -104,6 +104,8 @@ float GetHeight(float2 pos) {
 	static const float invG2 = 1.0f / 20.0f;
 	static const int g3 = 100;
 	static const float invG3 = 0.01f;
+	static const int g4 = 500;
+	static const float invG4 = 0.002f;
 
 	pos.xy += float2(3.0f, 6.0f);
 	float ret = 3.0f * GetNoise(pos.xy, g1, invG1) * (1.0f+GetNoise(pos.xy, g0, invG0));
@@ -112,7 +114,12 @@ float GetHeight(float2 pos) {
 	ret += 6.0f * GetNoise(pos.xy, g2, invG2);
 
 	pos.xy += float2(37.0f, -107.0f);
-	ret += 40.0f * GetNoise(pos.xy, g3, invG3);
+	pos.xy *= 1.27f;
+	ret += 50.0f * GetNoise(pos.xy, g3, invG3);
+
+	pos.xy += float2(371.0f, -81.0f);
+	pos.xy *= 0.92337f;
+	ret += 100.0f * GetNoise(pos.xy, g4, invG4);
 
 	return float4(ret, 0.0f, 0.0f, 0.0f);
 }

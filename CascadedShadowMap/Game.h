@@ -32,6 +32,7 @@ class Game :
 	HCURSOR m_hCursor;
 
 	void DrawFinal(); //Draw final image, to back buffer.
+	TerrainLODViewParams GetTerrainLODViewParams();
 public:
 	Game(UINT width, UINT height);
 	~Game();

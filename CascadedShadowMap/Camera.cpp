@@ -144,3 +144,7 @@ FrustumRays Camera::GetRays() {
 	ret.v4 = XMVector3Normalize(m_direction - l * m_right);
 	return ret;
 }
+
+float Camera::GetTanFOVH() {
+	return tan(0.5f * m_fovY) * m_aspectRatio;
+}

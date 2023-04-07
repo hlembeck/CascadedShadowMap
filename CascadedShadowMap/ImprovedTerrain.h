@@ -26,6 +26,7 @@ public:
 	//Create tile from the bottom-left corner (x,y), and worldspace width of the tile.
 	void Create(float x, float y, float width);
 	TileParams GetTileParams();
+	XMFLOAT4 GetCircumscribedSphere();
 };
 
 class ImprovedChunk {
@@ -49,7 +50,6 @@ class ImprovedTerrain63 :
 
 	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-	ImprovedChunk m_chunk; //Testing with single chunk
 
 	//Testing virtual texture
 	ComPtr<ID3D12Resource> m_virtualTexture;
@@ -60,10 +60,13 @@ class ImprovedTerrain63 :
 	//Quadtree forest on CPU to be traversed each upon camera update (change in position or direction)
 	Tile** m_roots;
 	UINT m_nRoots;
+	//Testing storing geometric error as per level, for simplicity.
+	float m_geomErrors[NTERRAINLEVELS];
 
 	//Constant buffer for the world matrices and UV coordinate starts for tiles.
 	ComPtr<ID3D12Resource> m_constantBuffer;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_cbvHandle;
+
 
 	void CreateVertexTexture();
 	void CreateVirtualTexture();
@@ -71,18 +74,20 @@ class ImprovedTerrain63 :
 	void WaitForList();
 
 	//Testing
-	void CreateChunk();
 	XMMATRIX* CreateRoots(CameraView view);
 	void CreateConstantBuffer();
 	XMMATRIX CreateTileTree(UINT rootIndex, float x, float y, XMUINT2 texCoords);
+	//tanFOVH = tan(fovH/2) = tan(0.5f*view.m_fovY)*view.m_aspectRatio
+	float GetScreenError(UINT rootIndex, UINT level, TerrainLODViewParams viewParams);
+	//Fills vector with all necessary tiles in a chunk(root) without overflowing cbuffer space.
+	void GetChunkTileParams(std::vector<TileParams>& tileParams, Tile* pTiles, UINT maxSize, TerrainLODViewParams viewParams);
 public:
 	ImprovedTerrain63();
 	~ImprovedTerrain63();
 	void Init(CameraView view);
-	void RenderChunk(ID3D12GraphicsCommandList* commandList);
 
 	//Tiles
-	void RenderTiles(BoundingFrustum frustum, XMMATRIX viewMatrix, ID3D12GraphicsCommandList* commandList);
+	void RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommandList* commandList);
 
 	void UpdateRoots(ID3D12GraphicsCommandList* commandList, BoundingFrustum frustum, XMMATRIX viewMatrix);
 };
