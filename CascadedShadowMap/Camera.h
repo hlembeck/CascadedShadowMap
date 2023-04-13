@@ -43,6 +43,9 @@ public:
 
 	XMFLOAT4 GetPosition(); //For shader, thus XMFLOAT4 necessary instead of the opaque XMVECTOR
 	XMFLOAT4 GetDirection();
+	//Returns direction vector, whose length is the length of the frustum (assuming nearZ=0).
+	XMVECTOR GetScaledDirection();
+	XMVECTOR GetPositionVECTOR();
 
 	FrustumRays GetRays();
 	float GetTanFOVH();

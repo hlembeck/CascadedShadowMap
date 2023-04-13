@@ -17,7 +17,7 @@ struct TileParams {
 };
 
 cbuffer TileInfo : register(b1) {
-	TileParams tileParams[819];
+	TileParams tileParams[121];
 };
 
 cbuffer CSMCameras : register(b2) {
@@ -79,5 +79,6 @@ float GetShadowFactor(float4 wPos) {
 
 float4 PS(VSOutput input) : SV_TARGET{
 	input.n = normalize(input.n);
-	return /*GetShadowFactor(input.wPos) * */GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position) /** float4(0.1f,0.9f,0.2f,1.0f)*/;
+	return /*GetShadowFactor(input.wPos) * */GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position);
+	//return float4(.75f,0.3f,0.2f,0.0f);
 }

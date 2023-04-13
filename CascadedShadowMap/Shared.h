@@ -48,6 +48,7 @@ using namespace Microsoft::WRL;
 #include <stdlib.h>
 #include <cstdlib>
 #include <random>
+#include <cmath>
 
 constexpr UINT MAXINSTANCES = 1024;
 constexpr float FOVY = DirectX::XM_PIDIV4;
@@ -148,6 +149,11 @@ struct TerrainLODViewParams {
     float screenWidth;
     BoundingFrustum frustum;
     XMMATRIX viewMatrix;
+};
+
+struct TileParams {
+    XMMATRIX worldMatrix;
+    XMUINT2 texCoords;
 };
 
 struct Time {

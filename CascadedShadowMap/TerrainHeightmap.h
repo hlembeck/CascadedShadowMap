@@ -50,6 +50,8 @@ protected:
 
 	//Tiles
 	void GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap);
+	void UpdateChunks(XMMATRIX* worldMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap);
+
 
 	//To generate 4032x4032 chunk, which then has mip levels generated.
 	void Generate4KChunk(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);

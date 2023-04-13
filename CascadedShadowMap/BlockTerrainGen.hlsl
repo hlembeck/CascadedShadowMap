@@ -4,7 +4,7 @@ Texture2D<float2> gTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 cbuffer WorldMatrices : register(b0) {
-	matrix worldMatrices[820];
+	matrix worldMatrices[121];
 };
 
 struct VSOutput {
@@ -98,14 +98,16 @@ float GetNoise(float2 pos, int granularity, float invGranularity) {
 float GetHeight(float2 pos) {
 	static const int g0 = 5;
 	static const float invG0 = 0.2f;
-	static const int g1 = 10;
-	static const float invG1 = 0.1f;
-	static const int g2 = 20;
-	static const float invG2 = 1.0f / 20.0f;
-	static const int g3 = 100;
-	static const float invG3 = 0.01f;
-	static const int g4 = 500;
-	static const float invG4 = 0.002f;
+	static const int g1 = 9;
+	static const float invG1 = 1.0f/9.0f;
+	static const int g2 = 21;
+	static const float invG2 = 1.0f / 21.0f;
+	static const int g3 = 111;
+	static const float invG3 = 1.0f/111.0f;
+	static const int g4 = 513;
+	static const float invG4 = 1.0f/513.0f;
+	static const int g5 = 977;
+	static const float invG5 = 1.0f/977.0f;
 
 	pos.xy += float2(3.0f, 6.0f);
 	float ret = 3.0f * GetNoise(pos.xy, g1, invG1) * (1.0f+GetNoise(pos.xy, g0, invG0));
@@ -119,7 +121,11 @@ float GetHeight(float2 pos) {
 
 	pos.xy += float2(371.0f, -81.0f);
 	pos.xy *= 0.92337f;
-	ret += 100.0f * GetNoise(pos.xy, g4, invG4);
+	ret += 150.0f * GetNoise(pos.xy, g4, invG4);
+
+	/*pos.xy += float2(-751.0f, 733.0f);
+	pos.xy *= 1.2789f;
+	ret += 350.0f * GetNoise(pos.xy, g5, invG5);*/
 
 	return float4(ret, 0.0f, 0.0f, 0.0f);
 }

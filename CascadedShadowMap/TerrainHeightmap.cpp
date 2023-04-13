@@ -177,6 +177,72 @@ void HeightmapGen::GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices,
 	WaitForQueue();
 }
 
+void HeightmapGen::UpdateChunks(XMMATRIX* worldMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap) {
+	BYTE* pData;
+	D3D12_RANGE readRange = {};
+	m_cbuffer->Map(0, &readRange, (void**)&pData);
+	memcpy(pData, worldMatrices, sizeof(XMMATRIX) * nMatrices);
+	m_cbuffer->Unmap(0, nullptr);
+
+	ThrowIfFailed(m_commandAllocator->Reset());
+	ThrowIfFailed(m_commandList->Reset(m_commandAllocator.Get(), PipelineObjects::m_blockTerrainGen.Get()));
+
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_coarseTerrainTexture.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+	m_commandList->SetGraphicsRootSignature(RootSignatures::m_gRootSignature.Get());
+	m_commandList->RSSetViewports(1, &m_coarseTerrainViewport);
+	m_commandList->RSSetScissorRects(1, &m_coarseTerrainScissorRect);
+	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	ID3D12DescriptorHeap* pHeaps[] = { DescriptorHeaps::GetCBVHeap() };
+	m_commandList->SetDescriptorHeaps(1, pHeaps);
+	m_commandList->SetGraphicsRootDescriptorTable(3, m_randomTextureSRV);
+	m_commandList->SetGraphicsRootConstantBufferView(0, m_cbuffer->GetGPUVirtualAddress());
+
+	const float clearColor[] = { 0.0f,0.0f,0.0f,0.0f };
+	m_commandList->ClearRenderTargetView(m_coarseTerrainRTV, clearColor, 0, nullptr);
+	m_commandList->OMSetRenderTargets(1, &m_coarseTerrainRTV, FALSE, NULL);
+	//Draw
+	m_commandList->IASetVertexBuffers(0, 1, &m_quadVertexView);
+	m_commandList->DrawInstanced(6, nMatrices, 0, 0);
+
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_coarseTerrainTexture.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(destResource, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+	m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+
+	D3D12_TEXTURE_COPY_LOCATION srcLocation;
+	D3D12_TEXTURE_COPY_LOCATION destLocation;
+	//Copy tiles
+	{
+		srcLocation = {
+			m_coarseTerrainTexture.Get(),
+			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX
+		};
+		destLocation = {
+			destResource,
+			D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX
+		};
+		destLocation.SubresourceIndex = 0;
+
+		for (UINT i = 0; i < nMatrices; i++) {
+			srcLocation.SubresourceIndex = i;
+			m_commandList->CopyTextureRegion(&destLocation, texCoords[i].x, texCoords[i].y, 0, &srcLocation, NULL);
+		}
+	}
+
+
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(destResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	m_commandList->ResourceBarrier(1, &resourceBarrier);
+
+	m_commandList->Close();
+	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
+	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+	WaitForQueue();
+}
+
 void HeightmapGen::CreateResources(UINT16 nRoots) {
 	D3D12_RESOURCE_DESC desc;
 	//Random texture

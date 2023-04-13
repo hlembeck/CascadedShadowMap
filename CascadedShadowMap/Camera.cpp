@@ -132,6 +132,14 @@ XMFLOAT4 Camera::GetDirection() {
 	return ret;
 }
 
+XMVECTOR Camera::GetPositionVECTOR() {
+	return m_position;
+}
+
+XMVECTOR Camera::GetScaledDirection() {
+	return m_direction * m_farZ;
+}
+
 FrustumRays Camera::GetRays() {
 	FrustumRays ret;
 	ret.d = m_farZ;

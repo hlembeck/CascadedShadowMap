@@ -10,7 +10,7 @@ class Game :
 	private Scene,
 	private Player,
 	private Time, //Disconnected from Game to allow other classes access to it.
-	private ImprovedTerrain63
+	private Terrain
 {
 
 	//Command list & allocator  --  may detach from this class in the future.

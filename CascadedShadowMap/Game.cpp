@@ -1,6 +1,6 @@
 #include "Game.h"
 
-constexpr float FARZ = 240.0f;
+constexpr float FARZ = 200.0f;
 
 Game::Game(UINT width, UINT height) : DXWindowBase(width,height) {}
 
@@ -20,7 +20,7 @@ void Game::OnInit() {
     BasicShadow::Load(2048);
     CreateCommandList();
 
-    ImprovedTerrain63::Init(*this);
+    Terrain::Init(*this);
 
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
@@ -42,6 +42,7 @@ void Game::OnUpdate() {
         Player::RotateWorldY(((cursorPos.x - m_cursorPos.x) / m_mouseScaleFactor) * elapsedTime);
         SetCursorPos(m_cursorPos.x, m_cursorPos.y);
     }
+    Terrain::UpdateRoots(GetTerrainLODViewParams());
 }
 
 void Game::DrawFinal() {
@@ -58,7 +59,7 @@ void Game::DrawFinal() {
         //Draw terrain.
         m_commandList->SetPipelineState(PipelineObjects::m_chunkTerrainRender.Get());
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
-        ImprovedTerrain63::RenderTiles(GetTerrainLODViewParams(), m_commandList.Get());
+        Terrain::RenderTiles(GetTerrainLODViewParams(), m_commandList.Get());
 
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         
@@ -152,7 +153,7 @@ void Game::OnKeyUp(WPARAM wParam) {
 }
 
 void Game::OnScroll(WPARAM wParam) {
-    float v = (SHORT)(HIWORD(wParam)) / 1200.0f;
+    float v = (SHORT)(HIWORD(wParam)) / 600.0f;
     Player::UpdateLinearVelocity(v);
 }
 
