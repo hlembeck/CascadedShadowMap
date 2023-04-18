@@ -59,7 +59,7 @@ constexpr DirectX::XMVECTOR LIGHTDIR = { 1.0f, -0.5f, 1.0f, 0.0f };
 constexpr float SHADOWBIAS = 0.01f;
 //63*2^6 < 2^12 = 4096. We generate terrain on the most detailed scale of 1m grid spacing, and so the terrain is rendered on 4032x4032 "meter" chunks. Then we can have 6 mip levels, where 0 is the raw generated terrain, and 5 is the coarsest terrain (spanned by 63x63 grid). Thus the 5th mipmap should be stored whenever the chunk is visible, and this fits in a single tile of the virtual texture.
 constexpr UINT NTERRAINLEVELS = 1;
-constexpr float TERRAINHEIGHTMAX = 40.0f;
+constexpr float TERRAINHEIGHTMAX = 1000.0f;
 
 // From DXSampleHelper.h 
 // Source: https://github.com/Microsoft/DirectX-Graphics-Samples

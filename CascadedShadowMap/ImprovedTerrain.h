@@ -2,39 +2,38 @@
 #include "DXBase.h"
 #include "TerrainHeightmap.h"
 
-struct TileInformation {
-	BoundingBox bounds;
-	TileParams tileParams;
-	INT isResident;
-};
+//tanFOVH = tan(fovH/2) = tan(0.5f*view.m_fovY)*view.m_aspectRatio
+float GetScreenError(XMFLOAT4 circumSphere, float geomError, TerrainLODViewParams viewParams);
 
 class Tile {
-	TileInformation m_tileInfo;
+	BoundingBox m_bounds; //World-space bounds of the chunk.
+	TileParams m_tileParams;
+	XMFLOAT2 m_position;
+
+	Tile* m_children; //If screen-space error of this tile is too high, then all four children are created, since at the moment there is no system to render a quadrant at a higher resolution than the other quadrants. This means that m_children is NULL iff this tile has screen-space error low enough.
 public:
 	Tile();
-	Tile(TileInformation tileInfo);
-	void SetTexCoords(XMUINT2 coords, INT isResident);
-	BOOL IsVisible(BoundingFrustum frustum, XMMATRIX viewMatrix);
-	BOOL NeedsUpdate(BoundingFrustum frustum, XMMATRIX viewMatrix);
-	//(x,y) are coordinates of the bottom left of the tile, so that the tile spans (x,y) to (x+62*2^(MAXLEVELS-level-1),y+62*2^(MAXLEVELS-level-1))
-	XMMATRIX Create(float x, float y, XMUINT2 texCoords, INT isResident, float width);
-	//Create tile from the bottom-left corner (x,y), and worldspace width of the tile.
-	void Create(float x, float y, float width);
-	TileParams GetTileParams();
-	XMFLOAT4 GetCircumscribedSphere();
+	~Tile();
+	Tile(XMFLOAT2 pos, float width);
+	void SetTexCoords(XMUINT2 texCoords);
+	void Create(XMFLOAT2 pos, float width, std::vector<XMMATRIX> matrices);
 };
 
 class Chunk {
 	BoundingBox m_bounds; //World-space bounds of the chunk.
 	TileParams m_tileParams;
 	XMFLOAT2 m_position;
+
+	Tile* m_children;
 public:
-	XMMATRIX Create(float x, float y, XMUINT2 texCoords, float width);
+	~Chunk();
+	XMMATRIX Create(float x, float y, D3D12_TILED_RESOURCE_COORDINATE texCoords, float width, TerrainLODViewParams viewParams);
 	XMMATRIX Update(float x, float y, float width); //x,y are change in position, not position itself.
 	BOOL IsVisible(BoundingFrustum frustum, XMMATRIX viewMatrix);
 	TileParams GetTileParams();
 	XMFLOAT2 GetPosition();
 	XMUINT2 GetTexCoords();
+	std::vector<D3D12_TILED_RESOURCE_COORDINATE> InitLOD(TerrainLODViewParams viewParams);
 };
 
 /*
@@ -60,11 +59,13 @@ class Terrain :
 	//Testing virtual texture
 	ComPtr<ID3D12Resource> m_virtualTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_srvHandle; //SRV for virtual texture, used in RenderChunk
-	//Heap for virtual texture
-	ComPtr<ID3D12Heap> m_heap;
 
 	//Quadtree forest on CPU to be traversed each upon camera update (change in position or direction)
 	Chunk m_chunks[121];
+
+	D3D12_TILED_RESOURCE_COORDINATE* m_texTiles;
+	UINT m_begin;
+	UINT m_end;
 
 	//Constant buffer for the world matrices and UV coordinate starts for tiles.
 	ComPtr<ID3D12Resource> m_constantBuffer;
@@ -77,16 +78,17 @@ class Terrain :
 	void WaitForList();
 
 	//Testing
-	XMMATRIX* CreateRoots(CameraView view);
+	std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> CreateRoots(CameraView view, TerrainLODViewParams viewParams);
 	void CreateConstantBuffer();
-	//tanFOVH = tan(fovH/2) = tan(0.5f*view.m_fovY)*view.m_aspectRatio
-	float GetScreenError(UINT rootIndex, UINT level, TerrainLODViewParams viewParams);
-	//Fills vector with all necessary tiles in a chunk(root) without overflowing cbuffer space.
-	void GetChunkTileParams(std::vector<TileParams>& tileParams, Tile* pTiles, UINT maxSize, TerrainLODViewParams viewParams);
+
+	BOOL BatchTexTile(D3D12_TILED_RESOURCE_COORDINATE* pTexCoords);
+	void PushTexTile(D3D12_TILED_RESOURCE_COORDINATE texCoords);
+
+	void GenerateInitialLOD(TerrainLODViewParams viewParams);
 public:
 	Terrain();
 	~Terrain();
-	void Init(CameraView view);
+	void Init(CameraView view, TerrainLODViewParams viewParams);
 
 	//Tiles
 	void RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommandList* commandList);

@@ -28,6 +28,8 @@ class HeightmapGen :
 	D3D12_CPU_DESCRIPTOR_HANDLE m_coarseTerrainRTV;
 	D3D12_VIEWPORT m_coarseTerrainViewport;
 	D3D12_RECT m_coarseTerrainScissorRect;
+	
+	ComPtr<ID3D12Heap> m_heap;
 
 	//TESTING
 	D3D12_VIEWPORT m_chunkViewport;
@@ -35,7 +37,6 @@ class HeightmapGen :
 	ComPtr<ID3D12Resource> m_cbuffer;
 protected:
 	//Since it is fast to generate the ground level data for an entire chunk at a time (entire 4096x4096 block fits in single texture, for example), we generate by blocks. The geometric error calculations for each level take more time.
-	void GenerateBlock(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
 	void CreateResources(UINT16 nRoots);
 	void CreateConstantBuffer(UINT nRoots);
 	void CreateCommandList();
@@ -44,17 +45,9 @@ protected:
 	void CreateCoarseTerrainRTV(UINT16 nRoots);
 	void FillCoarseVertexBuffer();
 
-	//TESTING
-	void GenerateChunk(ChunkGenParams params);
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTESTHandle() { return m_randomTextureSRV; };
-
 	//Tiles
-	void GenerateInitialTiles(XMMATRIX* worldMatrices, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap);
-	void UpdateChunks(XMMATRIX* worldMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, ID3D12Heap* heap);
-
-
-	//To generate 4032x4032 chunk, which then has mip levels generated.
-	void Generate4KChunk(XMMATRIX worldMatrix, ID3D12Resource* destResource, ID3D12Heap* heap);
+	void GenerateInitialTiles(XMMATRIX* worldMatrices, D3D12_TILED_RESOURCE_COORDINATE* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing);
+	void UpdateChunks(XMMATRIX* worldMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing);
 public:
 	HeightmapGen(const UINT randomResolution = 16) : m_randomResolution(randomResolution) {};
 	void Init(UINT nRoots);

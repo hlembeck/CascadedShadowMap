@@ -19,6 +19,10 @@ struct GSOutput {
 	uint slice : SV_RenderTargetArrayIndex;
 };
 
+cbuffer ChunkSpacing : register(b3) {
+	float d;
+};
+
 VSOutput VS(float2 pos : POSITION, uint instance : SV_InstanceID) {
 	VSOutput ret = (VSOutput)0;
 	ret.pos = float4(pos, 0.0f, 1.0f);
@@ -104,10 +108,10 @@ float GetHeight(float2 pos) {
 	static const float invG2 = 1.0f / 21.0f;
 	static const int g3 = 111;
 	static const float invG3 = 1.0f/111.0f;
-	static const int g4 = 513;
-	static const float invG4 = 1.0f/513.0f;
-	static const int g5 = 977;
-	static const float invG5 = 1.0f/977.0f;
+	static const int g4 = 977;
+	static const float invG4 = 1.0f/977.0f;
+	static const int g5 = 5781;
+	static const float invG5 = 1.0f/5781.0f;
 
 	pos.xy += float2(3.0f, 6.0f);
 	float ret = 3.0f * GetNoise(pos.xy, g1, invG1) * (1.0f+GetNoise(pos.xy, g0, invG0));
@@ -117,15 +121,15 @@ float GetHeight(float2 pos) {
 
 	pos.xy += float2(37.0f, -107.0f);
 	pos.xy *= 1.27f;
-	ret += 50.0f * GetNoise(pos.xy, g3, invG3);
+	ret += 31.0f * GetNoise(pos.xy, g3, invG3);
 
 	pos.xy += float2(371.0f, -81.0f);
 	pos.xy *= 0.92337f;
-	ret += 150.0f * GetNoise(pos.xy, g4, invG4);
+	ret += 350.0f * GetNoise(pos.xy, g4, invG4);
 
 	/*pos.xy += float2(-751.0f, 733.0f);
 	pos.xy *= 1.2789f;
-	ret += 350.0f * GetNoise(pos.xy, g5, invG5);*/
+	ret += 3000.0f * GetNoise(pos.xy, g5, invG5);*/
 
 	return float4(ret, 0.0f, 0.0f, 0.0f);
 }
@@ -133,7 +137,7 @@ float GetHeight(float2 pos) {
 float4 PS(GSOutput input) : SV_TARGET
 {
 	float height = GetHeight(input.wPos.xy);
-	float3 v1 = float3(1.0f,GetHeight(float2(input.wPos.x+1.0f,input.wPos.y))-height,0.0f);
-	float3 v2 = float3(0.0f,GetHeight(float2(input.wPos.x, input.wPos.y+1.0f))-height,1.0f);
+	float3 v1 = float3(d,GetHeight(float2(input.wPos.x+d,input.wPos.y))-height,0.0f);
+	float3 v2 = float3(0.0f,GetHeight(float2(input.wPos.x, input.wPos.y+d))-height,d);
 	return float4(height,normalize(cross(v2,v1)));
 }

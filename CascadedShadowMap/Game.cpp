@@ -1,6 +1,6 @@
 #include "Game.h"
 
-constexpr float FARZ = 200.0f;
+constexpr float FARZ = 1000.0f;
 
 Game::Game(UINT width, UINT height) : DXWindowBase(width,height) {}
 
@@ -20,7 +20,7 @@ void Game::OnInit() {
     BasicShadow::Load(2048);
     CreateCommandList();
 
-    Terrain::Init(*this);
+    Terrain::Init(*this, GetTerrainLODViewParams());
 
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
