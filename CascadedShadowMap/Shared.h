@@ -49,6 +49,7 @@ using namespace Microsoft::WRL;
 #include <cstdlib>
 #include <random>
 #include <cmath>
+#include <queue>
 
 constexpr UINT MAXINSTANCES = 1024;
 constexpr float FOVY = DirectX::XM_PIDIV4;

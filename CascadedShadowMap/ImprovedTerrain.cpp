@@ -1,55 +1,9 @@
 #include "ImprovedTerrain.h"
 #include "DescriptorHeaps.h"
 
-float GetScreenError(XMFLOAT4 circumSphere, float geomError, TerrainLODViewParams viewParams) {
-	circumSphere = {circumSphere.x-viewParams.position.x,circumSphere.y- viewParams.position.y,circumSphere.z- viewParams.position.z,circumSphere.w};
-	float d = sqrt(circumSphere.x * circumSphere.x + circumSphere.y * circumSphere.y + circumSphere.z * circumSphere.z) - circumSphere.w;
-	float ret = 0.5f * geomError * viewParams.screenWidth;
-	ret /= std::max(d,0.0001f)*viewParams.tanFOVH;
-	return ret;
-}
+Tile::~Tile() {}
 
-Tile::Tile() : m_children(NULL) {}
-
-Tile::~Tile() {
-	if(m_children)
-		delete[] m_children;
-}
-
-Tile::Tile(XMFLOAT2 pos, float width) : m_position(pos), m_children(NULL) {
-	float halfWidth = width * 31.0f;
-
-	m_bounds = BoundingBox(
-		{ pos.x + halfWidth,0.0f,pos.y + halfWidth },
-		{ halfWidth,TERRAINHEIGHTMAX,halfWidth }
-	);
-
-	m_tileParams.worldMatrix = XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width,1.0f,width),XMMatrixTranslation(pos.x, 0.0f, pos.y)));
-}
-
-void Tile::SetTexCoords(XMUINT2 texCoords) {
-	m_tileParams.texCoords = texCoords;
-}
-
-void Tile::Create(XMFLOAT2 pos, float width, std::vector<XMMATRIX> matrices) {
-	float halfWidth = width * 31.0f;
-
-	m_bounds = BoundingBox(
-		{ pos.x + halfWidth,0.0f,pos.y + halfWidth },
-		{ halfWidth,TERRAINHEIGHTMAX,halfWidth }
-	);
-
-	m_tileParams.worldMatrix = XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, 1.0f, width), XMMatrixTranslation(pos.x, 0.0f, pos.y)));
-
-	matrices.push_back(XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, width, 1.0f), XMMatrixTranslation(pos.x, pos.y, 0.0f))));
-}
-
-Chunk::~Chunk() {
-	if (m_children)
-		delete[] m_children;
-}
-
-XMMATRIX Chunk::Create(float x, float y, D3D12_TILED_RESOURCE_COORDINATE texCoords, float width, TerrainLODViewParams viewParams) {
+XMMATRIX Tile::Create(float x, float y, D3D12_TILED_RESOURCE_COORDINATE texCoords, float width, TerrainLODViewParams viewParams) {
 
 	float halfWidth = width * 31.0f;
 
@@ -62,23 +16,10 @@ XMMATRIX Chunk::Create(float x, float y, D3D12_TILED_RESOURCE_COORDINATE texCoor
 
 	m_tileParams = { XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width,1.0f,width),XMMatrixTranslation(x, 0.0f, y))),{64*texCoords.X,64*texCoords.Y} };
 
-	float radius = sqrt(halfWidth*halfWidth*2.0f + TERRAINHEIGHTMAX*TERRAINHEIGHTMAX);
-
-	XMFLOAT4 circumSphere = {m_bounds.Center.x,0.0f,m_bounds.Center.z,radius};
-
-	if (GetScreenError(circumSphere, width, viewParams) > 20.0f) {
-		std::vector<XMMATRIX> matrices;
-		m_children = new Tile[4];
-		m_children[0].Create({ x, y }, halfWidth, matrices);
-		m_children[1].Create({ x + halfWidth, y }, halfWidth, matrices);
-		m_children[2].Create({ x, y+halfWidth }, halfWidth, matrices);
-		m_children[3].Create({ x + halfWidth, y + halfWidth }, halfWidth, matrices);
-	}
-
 	return XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, width, 1.0f), XMMatrixTranslation(x, y, 0.0f)));
 }
 
-XMMATRIX Chunk::Update(float x, float y, float width) {
+XMMATRIX Tile::Update(float x, float y, float width) {
 	float halfWidth = width * 31.0f;
 
 	m_position = { x, y };
@@ -93,40 +34,43 @@ XMMATRIX Chunk::Update(float x, float y, float width) {
 	return XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, width, 1.0f), XMMatrixTranslation(m_position.x, m_position.y, 0.0f)));
 }
 
-BOOL Chunk::IsVisible(BoundingFrustum frustum, XMMATRIX viewMatrix) {
+BOOL Tile::IsVisible(BoundingFrustum frustum, XMMATRIX viewMatrix) {
 	BoundingBox temp;
 	m_bounds.Transform(temp, viewMatrix);
 	return temp.Intersects(frustum);
 }
 
-TileParams Chunk::GetTileParams() {
+TileParams Tile::GetTileParams() {
 	return m_tileParams;
 }
 
-XMFLOAT2 Chunk::GetPosition() {
+XMFLOAT2 Tile::GetPosition() {
 	return m_position;
 }
 
-
-/*
-Returns a vector of all tiles desired to render, sorted such that tiles with higher error are before those with lower error (sacrifices ultra high LOD in favor of a less memory-intensive layout - movement doesn't update the higher level chunks as frequently).
-*/ 
-std::vector<D3D12_TILED_RESOURCE_COORDINATE> Chunk::InitLOD(TerrainLODViewParams viewParams) {
-	std::vector<D3D12_TILED_RESOURCE_COORDINATE> ret;
-	XMFLOAT4 circumSphere = {m_bounds.Center.x,m_bounds.Center.y ,m_bounds.Center.z,
-		sqrt(2.0f * m_bounds.Extents.x * m_bounds.Extents.x + m_bounds.Extents.y * m_bounds.Extents.y)
-	};
-	if (GetScreenError(circumSphere, 1.0f / 32.0f * m_bounds.Extents.x, viewParams)) {
-		m_children = new Tile[4];
-	}
-	return ret;
-}
-
-XMUINT2 Chunk::GetTexCoords() {
+XMUINT2 Tile::GetTexCoords() {
 	return m_tileParams.texCoords;
 }
 
-Terrain::Terrain() : m_chunkPosition({ 0.0f,0.0f }) {}
+//Adapted from Real-Time Rendering, Ch.19
+//tanFOVH = tan(fovH/2) = tan(0.5f*view.m_fovY)*view.m_aspectRatio
+void Tile::SetError(TerrainLODViewParams viewParams) {
+	float halfWidth = m_bounds.Extents.x;
+	float radius = sqrt(halfWidth * halfWidth * 2.0f + TERRAINHEIGHTMAX * TERRAINHEIGHTMAX);
+
+	XMFLOAT4 circumSphere = { m_bounds.Center.x,0.0f,m_bounds.Center.z,radius };
+
+	circumSphere = { circumSphere.x - viewParams.position.x,circumSphere.y - viewParams.position.y,circumSphere.z - viewParams.position.z,circumSphere.w };
+	float d = sqrt(circumSphere.x * circumSphere.x + circumSphere.y * circumSphere.y + circumSphere.z * circumSphere.z) - circumSphere.w;
+	m_error = 0.5f * halfWidth * viewParams.screenWidth;
+	m_error /= std::max(d, 0.0001f) * viewParams.tanFOVH;
+}
+
+float Tile::GetError() {
+	return m_error;
+}
+
+Terrain::Terrain() : m_TilePosition({ 0.0f,0.0f }) {}
 
 Terrain::~Terrain() { delete[] m_texTiles; }
 
@@ -278,14 +222,14 @@ void Terrain::Init(CameraView view, TerrainLODViewParams viewParams) {
 	m_end = 4096;
 	for (UINT i = 0; i < 64; i++) {
 		for (UINT j = 0; j < 64; j++) {
-			m_texTiles[i * 64 + j] = { 2*i,2*j };
+			m_texTiles[i * 64 + j] = { i,j };
 		}
 	}
 
 	std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> tiles = CreateRoots(view, viewParams);
 	CreateVirtualTexture();
 	HeightmapGen::Init(121);
-	HeightmapGen::GenerateInitialTiles(tiles.first, tiles.second, 121, m_virtualTexture.Get(), m_chunkWidth/62.0f);
+	HeightmapGen::GenerateInitialTiles(tiles.first, tiles.second, 121, m_virtualTexture.Get(), m_TileWidth/62.0f);
 	CreateConstantBuffer(); //Needs m_nRoots
 	delete[] tiles.first;
 	delete[] tiles.second;
@@ -297,8 +241,8 @@ void Terrain::RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommand
 	commandList->SetGraphicsRootDescriptorTable(1, m_cbvHandle);
 	std::vector<TileParams> tileParams;
 	for (UINT i = 0; i < 121; i++) {
-		if (m_chunks[i].IsVisible(viewParams.frustum, viewParams.viewMatrix)) {
-			tileParams.push_back(m_chunks[i].GetTileParams());
+		if (m_Tiles[i].IsVisible(viewParams.frustum, viewParams.viewMatrix)) {
+			tileParams.push_back(m_Tiles[i].GetTileParams());
 		}
 	}
 
@@ -315,10 +259,18 @@ void Terrain::RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommand
 
 std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> Terrain::CreateRoots(CameraView view, TerrainLODViewParams viewParams) {
 	/*
-	The length-edges of the view frustum are used to calculate the box of chunks handled by the game. This allows the camera to rotate without necessarily updating the chunks (rotation can be extremely fast depending on mouse settings).
+	The length-edges of the view frustum are used to calculate the box of Tiles handled by the game. This allows the camera to rotate without necessarily updating the Tiles (rotation can be extremely fast depending on mouse settings).
 
-	The chunks used form a square, and ideally the camera lies in the center (this doesn't occur often, as the chunks are world-bound to a grid of spacing 62*2^(NTERRAINLEVELS). Thus we initially take the square, centered at the origin, of side-lengths equal to the 62*2^(NTERRAINLEVELS)-padded view frustum's length-edges.
+	The Tiles used form a square, and ideally the camera lies in the center (this doesn't occur often, as the Tiles are world-bound to a grid of spacing 62*2^(NTERRAINLEVELS). Thus we initially take the square, centered at the origin, of side-lengths equal to the 62*2^(NTERRAINLEVELS)-padded view frustum's length-edges.
 	*/
+
+	struct TileCmp {
+		BOOL Cmp(Tile* a, Tile* b) {
+			return a->GetError() > b->GetError() ? TRUE : FALSE;
+		};
+	};
+
+	std::priority_queue<Tile*, std::vector<Tile*>, TileCmp> heap;
 
 	float y = tan(view.m_fovY / 2);
 
@@ -328,27 +280,27 @@ std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> Terrain::CreateRoots(Came
 	y = lengthEdge / 310.0f;
 	y = ceil(log2(y));
 
-	m_chunkWidth = 62.0f * (float)pow(2.0f,y);
+	m_TileWidth = 62.0f * (float)pow(2.0f,y);
 
 	HeightmapGen::CreateConstantBuffer(121);
 	
 	XMMATRIX* worldMatrices = new XMMATRIX[121];
 	D3D12_TILED_RESOURCE_COORDINATE* tiles = new D3D12_TILED_RESOURCE_COORDINATE[121];
-	y = -m_chunkWidth * 5.0f;
+	y = -m_TileWidth * 5.0f;
 	//Loop through the roots.
 	for (UINT i = 0; i < 11; i++) {
 		for (UINT j = 0; j < 11; j++) {
 			BatchTexTile(tiles + i * 11 + j);
-			worldMatrices [i*11+j] = m_chunks[i * 11 + j].Create(y + i * m_chunkWidth, y + j * m_chunkWidth, tiles[i * 11 + j], m_chunkWidth/62.0f, viewParams);
+			worldMatrices [i*11+j] = m_Tiles[i * 11 + j].Create(y + i * m_TileWidth, y + j * m_TileWidth, tiles[i * 11 + j], m_TileWidth/62.0f, viewParams);
 		}
 	}
 
-	//for (float i = 0; i < 2.0f * m_chunkWidth; i += 1.0f) {
-	//	for (float j = 0; j < 2.0f * chunkWidth; j += 1.0f) {
-	//		ind = (int)i * 2 * chunkWidth + (int)j;
-	//		m_chunks[ind] = new Tile[(pow(4, NTERRAINLEVELS) - 1) / 3];
-	//		//worldMatrices[ind] = curr->Create((-chunkWidth + i) * 62.0f, (-chunkWidth + j) * 62.0f, 0, { (UINT)i*64,(UINT)j*64 }, 1);
-	//		worldMatrices[ind] = CreateTileTree(ind, (-chunkWidth + i) * 62.0f, (-chunkWidth + j) * 62.0f, { (UINT)i * 64,(UINT)j * 64 });
+	//for (float i = 0; i < 2.0f * m_TileWidth; i += 1.0f) {
+	//	for (float j = 0; j < 2.0f * TileWidth; j += 1.0f) {
+	//		ind = (int)i * 2 * TileWidth + (int)j;
+	//		m_Tiles[ind] = new Tile[(pow(4, NTERRAINLEVELS) - 1) / 3];
+	//		//worldMatrices[ind] = curr->Create((-TileWidth + i) * 62.0f, (-TileWidth + j) * 62.0f, 0, { (UINT)i*64,(UINT)j*64 }, 1);
+	//		worldMatrices[ind] = CreateTileTree(ind, (-TileWidth + i) * 62.0f, (-TileWidth + j) * 62.0f, { (UINT)i * 64,(UINT)j * 64 });
 	//	}
 	//}
 	return { worldMatrices,tiles };
@@ -383,20 +335,20 @@ void Terrain::UpdateRoots(TerrainLODViewParams viewParams) {
 
 	BOOL stationary = TRUE;
 	{
-		if (viewParams.position.x - m_chunkPosition.x > m_chunkWidth) {
-			m_chunkPosition.x += m_chunkWidth;
+		if (viewParams.position.x - m_TilePosition.x > m_TileWidth) {
+			m_TilePosition.x += m_TileWidth;
 			stationary = FALSE;
 		}
-		else if (m_chunkPosition.x - viewParams.position.x > m_chunkWidth) {
-			m_chunkPosition.x -= m_chunkWidth;
+		else if (m_TilePosition.x - viewParams.position.x > m_TileWidth) {
+			m_TilePosition.x -= m_TileWidth;
 			stationary = FALSE;
 		}
-		if (viewParams.position.z - m_chunkPosition.y > m_chunkWidth) {
-			m_chunkPosition.y += m_chunkWidth;
+		if (viewParams.position.z - m_TilePosition.y > m_TileWidth) {
+			m_TilePosition.y += m_TileWidth;
 			stationary = FALSE;
 		}
-		else if (m_chunkPosition.y - viewParams.position.z > m_chunkWidth) {
-			m_chunkPosition.y -= m_chunkWidth;
+		else if (m_TilePosition.y - viewParams.position.z > m_TileWidth) {
+			m_TilePosition.y -= m_TileWidth;
 			stationary = FALSE;
 		}
 		if (stationary)
@@ -408,37 +360,31 @@ void Terrain::UpdateRoots(TerrainLODViewParams viewParams) {
 	std::vector<XMUINT2> texCoords;
 	for (UINT i = 0; i < 121; i++) {
 		stationary = TRUE;
-		temp = m_chunks[i].GetPosition();
+		temp = m_Tiles[i].GetPosition();
 
-		if (temp.x > m_chunkPosition.x + 5.5f * m_chunkWidth) {
-			temp.x = m_chunkPosition.x - 5.0f * m_chunkWidth;
+		if (temp.x > m_TilePosition.x + 5.5f * m_TileWidth) {
+			temp.x = m_TilePosition.x - 5.0f * m_TileWidth;
 			stationary = FALSE;
 		}
-		else if (temp.x < m_chunkPosition.x - 5.5f * m_chunkWidth) {
-			temp.x = m_chunkPosition.x + 5.0f * m_chunkWidth;
+		else if (temp.x < m_TilePosition.x - 5.5f * m_TileWidth) {
+			temp.x = m_TilePosition.x + 5.0f * m_TileWidth;
 			stationary = FALSE;
 		}
-		if (temp.y > m_chunkPosition.y + 5.5f * m_chunkWidth) {
-			temp.y = m_chunkPosition.y - 5.0f * m_chunkWidth;
+		if (temp.y > m_TilePosition.y + 5.5f * m_TileWidth) {
+			temp.y = m_TilePosition.y - 5.0f * m_TileWidth;
 			stationary = FALSE;
 		}
-		else if (temp.y < m_chunkPosition.y - 5.5f * m_chunkWidth) {
-			temp.y = m_chunkPosition.y + 5.0f * m_chunkWidth;
+		else if (temp.y < m_TilePosition.y - 5.5f * m_TileWidth) {
+			temp.y = m_TilePosition.y + 5.0f * m_TileWidth;
 			stationary = FALSE;
 		}
 		if (stationary == FALSE) {
-			matrices.push_back(m_chunks[i].Update(temp.x, temp.y, m_chunkWidth / 62.0f));
-			texCoords.push_back(m_chunks[i].GetTexCoords());
+			matrices.push_back(m_Tiles[i].Update(temp.x, temp.y, m_TileWidth / 62.0f));
+			texCoords.push_back(m_Tiles[i].GetTexCoords());
 		}
 	}
 	if (matrices.size() > 0) {
-		HeightmapGen::UpdateChunks(matrices.data(), texCoords.data(), matrices.size(), m_virtualTexture.Get(), m_chunkWidth / 62.0f);
-	}
-}
-
-void Terrain::GenerateInitialLOD(TerrainLODViewParams viewParams) {
-	for (UINT i = 0; i < 121; i++) {
-		m_chunks[i].InitLOD(viewParams);
+		HeightmapGen::UpdateChunks(matrices.data(), texCoords.data(), matrices.size(), m_virtualTexture.Get(), m_TileWidth / 62.0f);
 	}
 }
 
