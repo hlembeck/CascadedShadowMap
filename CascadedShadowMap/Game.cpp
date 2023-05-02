@@ -20,7 +20,7 @@ void Game::OnInit() {
     BasicShadow::Load(2048);
     CreateCommandList();
 
-    Terrain::Init(*this, GetTerrainLODViewParams());
+    LODTerrain::Init(*this, GetTerrainLODViewParams());
 
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
@@ -42,7 +42,7 @@ void Game::OnUpdate() {
         Player::RotateWorldY(((cursorPos.x - m_cursorPos.x) / m_mouseScaleFactor) * elapsedTime);
         SetCursorPos(m_cursorPos.x, m_cursorPos.y);
     }
-    Terrain::UpdateRoots(GetTerrainLODViewParams());
+    //Terrain::UpdateRoots(GetTerrainLODViewParams());
 }
 
 void Game::DrawFinal() {
@@ -59,7 +59,7 @@ void Game::DrawFinal() {
         //Draw terrain.
         m_commandList->SetPipelineState(PipelineObjects::m_chunkTerrainRender.Get());
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
-        Terrain::RenderTiles(GetTerrainLODViewParams(), m_commandList.Get());
+        LODTerrain::RenderChunks(GetTerrainLODViewParams(), m_commandList.Get());
 
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         

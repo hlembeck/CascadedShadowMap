@@ -1,6 +1,6 @@
 #include "Player.h"
 
-Player::Player() : m_linearScale(1.0f) {}
+Player::Player() : m_linearScale(10.0f) {}
 
 Player::~Player() {}
 

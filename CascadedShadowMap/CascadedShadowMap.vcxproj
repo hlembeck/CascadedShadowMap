@@ -136,7 +136,7 @@
     <ClInclude Include="DescriptorHeaps.h" />
     <ClInclude Include="DXBase.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="ImprovedTerrain.h" />
+    <ClInclude Include="LODTerrain.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="PipelineObjects.h" />
     <ClInclude Include="Player.h" />
@@ -153,7 +153,7 @@
     <ClCompile Include="DescriptorHeaps.cpp" />
     <ClCompile Include="DXBase.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="ImprovedTerrain.cpp" />
+    <ClCompile Include="LODTerrain.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PipelineObjects.cpp" />
     <ClCompile Include="Player.cpp" />

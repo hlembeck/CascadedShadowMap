@@ -14,7 +14,7 @@ XMMATRIX Tile::Create(float x, float y, D3D12_TILED_RESOURCE_COORDINATE texCoord
 		{ halfWidth,TERRAINHEIGHTMAX,halfWidth }
 	);
 
-	m_tileParams = { XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width,1.0f,width),XMMatrixTranslation(x, 0.0f, y))),{64*texCoords.X,64*texCoords.Y} };
+	m_tileParams = { XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width,1.0f,width),XMMatrixTranslation(x, 0.0f, y))),{64 * texCoords.X,64 * texCoords.Y} };
 
 	return XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, width, 1.0f), XMMatrixTranslation(x, y, 0.0f)));
 }
@@ -29,7 +29,7 @@ XMMATRIX Tile::Update(float x, float y, float width) {
 		{ halfWidth,TERRAINHEIGHTMAX,halfWidth }
 	);
 
-	m_tileParams.worldMatrix = XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width,1.0f,width),XMMatrixTranslation(m_position.x, 0.0f, m_position.y)));
+	m_tileParams.worldMatrix = XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, 1.0f, width), XMMatrixTranslation(m_position.x, 0.0f, m_position.y)));
 
 	return XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(width, width, 1.0f), XMMatrixTranslation(m_position.x, m_position.y, 0.0f)));
 }
@@ -229,7 +229,7 @@ void Terrain::Init(CameraView view, TerrainLODViewParams viewParams) {
 	std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> tiles = CreateRoots(view, viewParams);
 	CreateVirtualTexture();
 	HeightmapGen::Init(121);
-	HeightmapGen::GenerateInitialTiles(tiles.first, tiles.second, 121, m_virtualTexture.Get(), m_TileWidth/62.0f);
+	HeightmapGen::GenerateInitialTiles(tiles.first, tiles.second, 121, m_virtualTexture.Get(), m_TileWidth / 62.0f);
 	CreateConstantBuffer(); //Needs m_nRoots
 	delete[] tiles.first;
 	delete[] tiles.second;
@@ -249,7 +249,7 @@ void Terrain::RenderTiles(TerrainLODViewParams viewParams, ID3D12GraphicsCommand
 	D3D12_RANGE range = {};
 	BYTE* pData;
 	m_constantBuffer->Map(0, &range, (void**)&pData);
-	memcpy(pData, tileParams.data(), sizeof(TileParams)*tileParams.size());
+	memcpy(pData, tileParams.data(), sizeof(TileParams) * tileParams.size());
 	m_constantBuffer->Unmap(0, nullptr);
 	for (UINT i = 0; i < tileParams.size(); i++) {
 		commandList->SetGraphicsRoot32BitConstant(4, i, 0);
@@ -274,16 +274,16 @@ std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> Terrain::CreateRoots(Came
 
 	float y = tan(view.m_fovY / 2);
 
-	float lengthEdge = view.m_farZ * sqrt(1.0f + y*y*(view.m_aspectRatio * view.m_aspectRatio + 1.0f));
+	float lengthEdge = view.m_farZ * sqrt(1.0f + y * y * (view.m_aspectRatio * view.m_aspectRatio + 1.0f));
 
 	//Find optimal power of 2 grid spacing, to cover frustum.
 	y = lengthEdge / 310.0f;
 	y = ceil(log2(y));
 
-	m_TileWidth = 62.0f * (float)pow(2.0f,y);
+	m_TileWidth = 62.0f * (float)pow(2.0f, y);
 
 	HeightmapGen::CreateConstantBuffer(121);
-	
+
 	XMMATRIX* worldMatrices = new XMMATRIX[121];
 	D3D12_TILED_RESOURCE_COORDINATE* tiles = new D3D12_TILED_RESOURCE_COORDINATE[121];
 	y = -m_TileWidth * 5.0f;
@@ -291,7 +291,7 @@ std::pair<XMMATRIX*, D3D12_TILED_RESOURCE_COORDINATE*> Terrain::CreateRoots(Came
 	for (UINT i = 0; i < 11; i++) {
 		for (UINT j = 0; j < 11; j++) {
 			BatchTexTile(tiles + i * 11 + j);
-			worldMatrices [i*11+j] = m_Tiles[i * 11 + j].Create(y + i * m_TileWidth, y + j * m_TileWidth, tiles[i * 11 + j], m_TileWidth/62.0f, viewParams);
+			worldMatrices[i * 11 + j] = m_Tiles[i * 11 + j].Create(y + i * m_TileWidth, y + j * m_TileWidth, tiles[i * 11 + j], m_TileWidth / 62.0f, viewParams);
 		}
 	}
 
@@ -396,5 +396,5 @@ BOOL Terrain::BatchTexTile(D3D12_TILED_RESOURCE_COORDINATE* pTexCoords) {
 }
 
 void Terrain::PushTexTile(D3D12_TILED_RESOURCE_COORDINATE texCoords) {
-	m_texTiles[(++m_end)%16384] = texCoords;
+	m_texTiles[(++m_end) % 16384] = texCoords;
 }

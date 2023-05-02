@@ -3,14 +3,14 @@
 #include "PipelineObjects.h"
 #include "Scene.h"
 #include "Player.h"
-#include "ImprovedTerrain.h"
+#include "LODTerrain.h"
 
 class Game :
 	public DXWindowBase,
 	private Scene,
 	private Player,
 	private Time, //Disconnected from Game to allow other classes access to it.
-	private Terrain
+	private LODTerrain
 {
 
 	//Command list & allocator  --  may detach from this class in the future.

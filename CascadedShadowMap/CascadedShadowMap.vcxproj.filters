@@ -129,7 +129,7 @@
     <ClInclude Include="TerrainHeightmap.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="ImprovedTerrain.h">
+    <ClInclude Include="LODTerrain.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
   </ItemGroup>
@@ -173,7 +173,7 @@
     <ClCompile Include="TerrainHeightmap.cpp">
       <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
-    <ClCompile Include="ImprovedTerrain.cpp">
+    <ClCompile Include="LODTerrain.cpp">
       <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
   </ItemGroup>

@@ -28,8 +28,6 @@ class HeightmapGen :
 	D3D12_CPU_DESCRIPTOR_HANDLE m_coarseTerrainRTV;
 	D3D12_VIEWPORT m_coarseTerrainViewport;
 	D3D12_RECT m_coarseTerrainScissorRect;
-	
-	ComPtr<ID3D12Heap> m_heap;
 
 	//TESTING
 	D3D12_VIEWPORT m_chunkViewport;
@@ -46,8 +44,9 @@ protected:
 	void FillCoarseVertexBuffer();
 
 	//Tiles
-	void GenerateInitialTiles(XMMATRIX* worldMatrices, D3D12_TILED_RESOURCE_COORDINATE* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing);
+	void GenerateInitialChunks(XMMATRIX* worldMatrices, D3D12_TILED_RESOURCE_COORDINATE* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing, ID3D12Heap* heap);
 	void UpdateChunks(XMMATRIX* worldMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing);
+	void GenerateTiles(XMMATRIX* tileMatrices, XMUINT2* texCoords, UINT nMatrices, ID3D12Resource* destResource, float chunkSpacing = 1.0f);
 public:
 	HeightmapGen(const UINT randomResolution = 16) : m_randomResolution(randomResolution) {};
 	void Init(UINT nRoots);

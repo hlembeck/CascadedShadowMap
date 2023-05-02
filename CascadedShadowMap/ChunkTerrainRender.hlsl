@@ -17,24 +17,25 @@ struct TileParams {
 };
 
 cbuffer TileInfo : register(b1) {
-	TileParams tileParams[121];
+	TileParams tileParams[819];
 };
 
 cbuffer CSMCameras : register(b2) {
 	matrix cameras[NFRUSTA];
 }
 
-cbuffer Index : register(b3) {
-	uint i;
-};
+//cbuffer Index : register(b3) {
+//	uint i;
+//};
 
 struct VSOutput {
 	float4 pos : SV_POSITION;
 	float4 wPos : WPOS;
 	float4 n : NORMAL;
+	float width : WIDTH;
 };
 
-VSOutput VS(float2 pos : POSITION) {
+VSOutput VS(float2 pos : POSITION, uint i : SV_InstanceID) {
 	VSOutput ret = (VSOutput)0;
 	float2 wPos = pos;
 	wPos.y = 62.0f - wPos.y;
@@ -43,6 +44,7 @@ VSOutput VS(float2 pos : POSITION) {
 	ret.wPos = mul(float4(pos.x, terrain.r, pos.y, 1.0f),tileParams[i].worldMatrix);
 	ret.pos = mul(ret.wPos, viewProj);
 	ret.n = float4(terrain.gba,0.0f);
+	ret.width = tileParams[i].worldMatrix._11;
 	return ret;
 }
 
@@ -79,6 +81,8 @@ float GetShadowFactor(float4 wPos) {
 
 float4 PS(VSOutput input) : SV_TARGET{
 	input.n = normalize(input.n);
-	return /*GetShadowFactor(input.wPos) * */GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position);
+	int width = log2(floor(input.width));
+	float4 lodColor = { width / 3.0f, 0.0f, 0.0f, 1.0f};
+	return /*GetShadowFactor(input.wPos) * *//*GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, direction, position) **/ lodColor;
 	//return float4(.75f,0.3f,0.2f,0.0f);
 }

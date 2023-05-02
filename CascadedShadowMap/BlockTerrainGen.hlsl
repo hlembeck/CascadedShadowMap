@@ -28,7 +28,6 @@ VSOutput VS(float2 pos : POSITION, uint instance : SV_InstanceID) {
 	ret.pos = float4(pos, 0.0f, 1.0f);
 	ret.wPos = ret.pos;
 	ret.wPos.xy += 1.0f;
-	ret.wPos.xy *= 63.0f*0.5f; //Scale to [0,63]x[0,63]
 	ret.wPos = mul(ret.wPos,worldMatrices[instance]);
 	ret.slice = instance;
 	return ret;
@@ -140,4 +139,5 @@ float4 PS(GSOutput input) : SV_TARGET
 	float3 v1 = float3(d,GetHeight(float2(input.wPos.x+d,input.wPos.y))-height,0.0f);
 	float3 v2 = float3(0.0f,GetHeight(float2(input.wPos.x, input.wPos.y+d))-height,d);
 	return float4(height,normalize(cross(v2,v1)));
+	//return float4(-100.0f,1.0f,1.0f,0.0f);
 }
