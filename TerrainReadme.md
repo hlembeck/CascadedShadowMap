@@ -9,3 +9,7 @@ To render terrain, we grids of $k\times k\times k$ vertices, where each vertex r
 An octree is used to help alleviate the above problem. Each node represents a block of world space that has its vertices set in the virtual texture. A texture with one texel per smallest node to be rendered is used to map world coordinates to virtual texture coordinates - this enables octree LOD with easy LOD transitions. 
 
 Ideally, each node in the octree is tested for intersection with the surface. If no intersection is detectable, then either the node spans too much space (granularity too high for the surface to appear), or the node does not intersct the surface at all. **The former observation is crucial to consider when writing the tree generation code (TODO)**. Currently the dual contouring is used on spheres (planets), so tree generation considers intersection with a hollow ball of some width, which accounts for noise applied to the sphere.
+
+### Octree-Surface Intersection
+
+Since implementation is currently used for spheres with noise, test octree bounding boxes for intersection with spheres. If origin of sphere lies outside of the bounding box, the sphere intersects the box if its radius is lies between the min and max distances from the box to the origin. If the origin lies inside the box, then the sphere intersects the box if any of the box corners lie outside of the sphere. Testing for two spheres, the inner and outer, determines whether the node should be created.
