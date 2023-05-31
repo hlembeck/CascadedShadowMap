@@ -15,3 +15,6 @@ Ideally, each node in the octree is tested for intersection with the surface. If
 Since implementation is currently used for spheres with noise, test octree bounding boxes for intersection with spheres. If origin of sphere lies outside of the bounding box, the sphere intersects the box if its radius is lies between the min and max distances from the box to the origin. If the origin lies inside the box, then the sphere intersects the box if any of the box corners lie outside of the sphere. Testing for two spheres, the inner and outer, determines whether the node should be created.
 
 ### DualContour Class
+
+
+### Limitations
