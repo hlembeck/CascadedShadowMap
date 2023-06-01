@@ -9,12 +9,13 @@ DXBase::~DXBase() {}
 void DXBase::CreateDevice(IDXGIFactory4* factory) {
     ComPtr<IDXGIAdapter1> adapter;
     GetAdapter(factory, &adapter);
-
+    OutputDebugString(L"BEFORE EXCEPTION RAISED\n");
     ThrowIfFailed(D3D12CreateDevice(
         adapter.Get(),
         D3D_FEATURE_LEVEL_12_0,
         IID_PPV_ARGS(&m_device)
     ));
+    OutputDebugString(L"AFTER EXCEPTION RAISED\n");
 }
 
 void DXBase::GetAdapter(IDXGIFactory1* pFactory, IDXGIAdapter1** ppAdapter) {
@@ -163,4 +164,32 @@ void DXWindowBase::WaitForPreviousFrame() {
         WaitForSingleObject(m_fenceEvent, INFINITE);
     }
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+}
+
+void CommandListAllocatorPair::CreateCommandList() {
+    ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
+    ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), NULL, IID_PPV_ARGS(&m_commandList)));
+    ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+    ThrowIfFailed(m_commandList->Close());
+    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
+    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    if (m_fenceEvent == nullptr) {
+        ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+    }
+    WaitForQueue();
+}
+
+void CommandListAllocatorPair::WaitForQueue() {
+    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), 1));
+    if (m_fence->GetCompletedValue() < 1) {
+        ThrowIfFailed(m_fence->SetEventOnCompletion(1, m_fenceEvent));
+        WaitForSingleObject(m_fenceEvent, INFINITE);
+    }
+    ThrowIfFailed(m_commandAllocator->Reset());
+    m_fence->Signal(0);
+}
+
+void CommandListAllocatorPair::Init() {
+    CreateCommandList();
 }

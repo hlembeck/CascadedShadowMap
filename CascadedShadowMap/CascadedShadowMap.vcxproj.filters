@@ -82,6 +82,12 @@
     <Filter Include="Header Files\Scene\Static\Terrain">
       <UniqueIdentifier>{26e9da57-4c42-496c-ad9b-75509e565afa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scene\Celestial Bodies">
+      <UniqueIdentifier>{0a748fe8-faa2-45fe-b727-b87065a10170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Celestial Bodies">
+      <UniqueIdentifier>{6fdcbbfb-94fc-4ba4-844f-57cfddcc1308}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -129,8 +135,14 @@
     <ClInclude Include="TerrainHeightmap.h">
       <Filter>Header Files\Scene\Static\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="LODTerrain.h">
-      <Filter>Header Files\Scene\Static\Terrain</Filter>
+    <ClInclude Include="CelestialBody.h">
+      <Filter>Header Files\Scene\Celestial Bodies</Filter>
+    </ClInclude>
+    <ClInclude Include="CelestialManager.h">
+      <Filter>Header Files\Scene\Celestial Bodies</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManagement.h">
+      <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,8 +185,14 @@
     <ClCompile Include="TerrainHeightmap.cpp">
       <Filter>Source Files\Scene\Static\Terrain</Filter>
     </ClCompile>
-    <ClCompile Include="LODTerrain.cpp">
-      <Filter>Source Files\Scene\Static\Terrain</Filter>
+    <ClCompile Include="CelestialBody.cpp">
+      <Filter>Source Files\Scene\Celestial Bodies</Filter>
+    </ClCompile>
+    <ClCompile Include="CelestialManager.cpp">
+      <Filter>Source Files\Scene\Celestial Bodies</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManagement.cpp">
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -207,6 +225,13 @@
     </CustomBuild>
     <CustomBuild Include="BasicShadowTerrain.hlsl">
       <Filter>Resource Files\Shadow</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PlanetGen.hlsl" />
+    <CustomBuild Include="DCMain.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="DCSampleGen.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

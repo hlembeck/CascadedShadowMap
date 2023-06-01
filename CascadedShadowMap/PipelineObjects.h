@@ -9,14 +9,16 @@ class PipelineObjects : public virtual RootSignatures {
 	void LoadBlockTerrainGenPSO();
 	void LoadChunkTerrainRenderPSO();
 
-	//void LoadClipmapUpsample();
+	void LoadDCMainPSO();
+	void LoadDCSampleGenPSO();;
 protected:
 	ComPtr<ID3D12PipelineState> m_simplePSO; //No textures, no shadow maps, one const static light in shader. Testing local illumination.
 
 	ComPtr<ID3D12PipelineState> m_shadowPSO;
 	ComPtr<ID3D12PipelineState> m_shadowTerrainPSO;
-	ComPtr<ID3D12PipelineState> m_clipmapUpsample;
 	ComPtr<ID3D12PipelineState> m_blockTerrainGen;
 	ComPtr<ID3D12PipelineState> m_chunkTerrainRender;
+	ComPtr<ID3D12PipelineState> m_dcMainPSO;
+	ComPtr<ID3D12PipelineState> m_dcSampleGenPSO;
 	void OnInit();
 };

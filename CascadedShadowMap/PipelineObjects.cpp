@@ -267,49 +267,65 @@ void PipelineObjects::LoadChunkTerrainRenderPSO() {
     ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_chunkTerrainRender)));
 }
 
-//void PipelineObjects::LoadClipmapUpsample() {
-//    D3D12_INPUT_ELEMENT_DESC elemDescs[2] = { 
-//        {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-//        {"TPOS", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
-//    };
-//    D3D12_INPUT_LAYOUT_DESC layoutDesc = {
-//        elemDescs,
-//        2
-//    };
-//
-//    ComPtr<ID3DBlob> vertexShader;
-//    ComPtr<ID3DBlob> pixelShader;
-//    UINT compileFlags = 0;
-//
-//    ThrowIfFailed(D3DCompileFromFile(L"ClipmapUpsample.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_1", compileFlags, 0, &vertexShader, NULL));
-//    ThrowIfFailed(D3DCompileFromFile(L"ClipmapUpsample.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_1", compileFlags, 0, &pixelShader, NULL));
-//
-//    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
-//        m_gRootSignature.Get(),
-//        CD3DX12_SHADER_BYTECODE(vertexShader.Get()),
-//        CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
-//        {},
-//        {},
-//        {},
-//        {},
-//        CD3DX12_BLEND_DESC(D3D12_DEFAULT),
-//        UINT_MAX,
-//        CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
-//        CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT),
-//        layoutDesc,
-//        D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,
-//        D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
-//        1,
-//        {},
-//        DXGI_FORMAT_UNKNOWN,
-//        {1,0},
-//        0,
-//        {NULL,0},
-//        D3D12_PIPELINE_STATE_FLAG_NONE
-//    };
-//    psoDesc.RTVFormats[0] = DXGI_FORMAT_R32_FLOAT;
-//    ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_clipmapUpsample)));
-//}
+void PipelineObjects::LoadDCMainPSO() {
+    D3D12_INPUT_ELEMENT_DESC elemDescs[2] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+    };
+    D3D12_INPUT_LAYOUT_DESC layoutDesc = {
+        elemDescs,
+        1
+    };
+
+    ComPtr<ID3DBlob> vertexShader;
+    ComPtr<ID3DBlob> geometryShader;
+    ComPtr<ID3DBlob> pixelShader;
+    UINT compileFlags = 0;
+    ThrowIfFailed(D3DCompileFromFile(L"DCMain.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_1", compileFlags, 0, &vertexShader, NULL));
+    ThrowIfFailed(D3DCompileFromFile(L"DCMain.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS", "gs_5_1", compileFlags, 0, &geometryShader, NULL));
+    ThrowIfFailed(D3DCompileFromFile(L"DCMain.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_1", compileFlags, 0, &pixelShader, NULL));
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {
+        m_gRootSignature.Get(),
+        CD3DX12_SHADER_BYTECODE(vertexShader.Get()),
+        CD3DX12_SHADER_BYTECODE(pixelShader.Get()),
+        {},
+        {},
+        CD3DX12_SHADER_BYTECODE(geometryShader.Get()),
+        {},
+        CD3DX12_BLEND_DESC(D3D12_DEFAULT),
+        UINT_MAX,
+        CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
+        CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT),
+        layoutDesc,
+        D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,
+        D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT,
+        1,
+        {},
+        DXGI_FORMAT_UNKNOWN,
+        {1,0},
+        0,
+        {NULL,0},
+        D3D12_PIPELINE_STATE_FLAG_NONE
+    };
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+    ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_dcMainPSO)));
+}
+
+void PipelineObjects::LoadDCSampleGenPSO() {
+    ComPtr<ID3DBlob> cs;
+    UINT compileFlags = 0;
+    ThrowIfFailed(D3DCompileFromFile(L"DCSampleGen.hlsl", NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CS", "cs_5_1", compileFlags, 0, &cs, NULL));
+
+    D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {
+        m_cRootSignature.Get(),
+        CD3DX12_SHADER_BYTECODE(cs.Get()),
+        0,
+        {NULL,0},
+        D3D12_PIPELINE_STATE_FLAG_NONE
+    };
+    ThrowIfFailed(m_device->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_dcSampleGenPSO)));
+}
 
 void PipelineObjects::OnInit() {
     RootSignatures::OnInit();
@@ -323,7 +339,7 @@ void PipelineObjects::OnInit() {
 
     layoutDesc.NumElements = 2;
     LoadShadowPSO(layoutDesc);
-    LoadShadowTerrainPSO();
+    //LoadShadowTerrainPSO();
 
     layoutDesc.NumElements = 3;
     inputElemDesc[2] = {
@@ -336,15 +352,17 @@ void PipelineObjects::OnInit() {
         0
     };
     LoadSimplePSO(layoutDesc);
-    LoadBlockTerrainGenPSO();
-    LoadChunkTerrainRenderPSO();
-    //LoadClipmapUpsample();
+    //LoadBlockTerrainGenPSO();
+    //LoadChunkTerrainRenderPSO();
+    LoadDCMainPSO();
+    LoadDCSampleGenPSO();
 
     //Debug
     m_simplePSO->SetName(L"Simple PSO");
     m_shadowPSO->SetName(L"Shadow PSO");
-    m_shadowTerrainPSO->SetName(L"Shadow Terrain PSO");
-    m_chunkTerrainRender->SetName(L"Chunk Terrain Render PSO");
-    m_blockTerrainGen->SetName(L"Block Terrain Gen PSO");
-    //m_clipmapUpsample->SetName(L"Clipmap Upsample PSO");
+    //m_shadowTerrainPSO->SetName(L"Shadow Terrain PSO");
+    //m_chunkTerrainRender->SetName(L"Chunk Terrain Render PSO");
+    //m_blockTerrainGen->SetName(L"Block Terrain Gen PSO");
+    m_dcMainPSO->SetName(L"DC Main PSO");
+    m_dcSampleGenPSO->SetName(L"DC Gen PSO");
 }

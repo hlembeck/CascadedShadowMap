@@ -20,8 +20,7 @@ void Game::OnInit() {
     BasicShadow::Load(2048);
     CreateCommandList();
 
-    LODTerrain::Init(*this, GetTerrainLODViewParams());
-
+    CelestialManager::Init(m_device.Get());
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
     m_commandList->Close();
@@ -57,9 +56,13 @@ void Game::DrawFinal() {
 
 
         //Draw terrain.
-        m_commandList->SetPipelineState(PipelineObjects::m_chunkTerrainRender.Get());
+        m_commandList->SetPipelineState(PipelineObjects::m_dcMainPSO.Get());
+        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+        CelestialManager::Render(m_commandList.Get());
+        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
-        LODTerrain::RenderChunks(GetTerrainLODViewParams(), m_commandList.Get());
 
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         

@@ -12,10 +12,18 @@ void RootSignatures::LoadComputeRS() {
         0
     };
 
+    D3D12_DESCRIPTOR_RANGE uavRange = {
+        D3D12_DESCRIPTOR_RANGE_TYPE_UAV,
+        1,
+        0,
+        0,
+        0
+    };
+
     CD3DX12_ROOT_PARAMETER rootParameters[3] = {};
-    rootParameters[0].InitAsConstants(3, 0);
+    rootParameters[0].InitAsConstantBufferView(0);
     rootParameters[1].InitAsDescriptorTable(1, &range);
-    rootParameters[2].InitAsUnorderedAccessView(0);
+    rootParameters[2].InitAsDescriptorTable(1,&uavRange);
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(_countof(rootParameters), rootParameters, 0, NULL, rootSignatureFlags);
     ComPtr<ID3DBlob> rootSignatureBlob;

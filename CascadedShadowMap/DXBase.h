@@ -63,3 +63,15 @@ private:
 	HANDLE m_fenceEvent;
 	ComPtr<ID3D12Fence> m_fence;
 };
+
+class CommandListAllocatorPair :public virtual DXBase {
+	void CreateCommandList();
+protected:
+	ComPtr<ID3D12GraphicsCommandList> m_commandList;
+	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+	ComPtr<ID3D12Fence> m_fence;
+	HANDLE m_fenceEvent;
+	void WaitForQueue();
+public:
+	void Init();
+};
