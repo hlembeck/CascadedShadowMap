@@ -1,13 +1,6 @@
 #pragma once
 #include "DualContour.h"
 
-//Incomplete list
-enum CelestialBodyClass {
-	Planet,
-	Star,
-	Moon, //Natural satellite (https://en.wikipedia.org/wiki/Natural_satellite)
-};
-
 struct NodeTile {
 	BoundingBox aabb;
 	float weight;
@@ -31,10 +24,21 @@ struct TreeNode {
 	void IncreaseCount(BoundingBox bounds); //Add back to tracked tiles
 };
 
+//Contains information describing which part of the planet is visible.
+struct VisiblePortion {
+	XMFLOAT4 back; //portion of back face visible.
+	XMFLOAT4 front;
+	XMFLOAT4 left;
+	XMFLOAT4 right;
+	XMFLOAT4 bottom;
+	XMFLOAT4 top;
+};
+
+
 class CelestialBody {
+protected:
 	TreeNode* m_root;
 
-	CelestialBodyClass m_class;
 	ComPtr<ID3D12Resource> m_randTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_randTextureSRV;
 
@@ -42,18 +46,22 @@ class CelestialBody {
 	ComPtr<ID3D12Resource> m_tileMap;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_tileMapSRV;
 
-	BoundingSphere m_outerSphere;
+	//Vertex buffer for instancing when rendering to screen. Any class of celestial body (e.g planet) that instantiates this class is to use only a single vertex buffer i.e only a single geometry base for the object. For a planet, where gravity has removed much of the overhanging terrain, the vertex buffer is triangles partitioning a square. For some other objects, dual contouring may be used, in whcih case the veretx buffer is a set of vertices with point "topology".
+	ComPtr<ID3D12Resource> m_vertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+	//Bounding spheres
 	BoundingSphere m_innerSphere;
-	//XMFLOAT3 m_axisLengths = {1.0f,1.0f,1.0f}; //For ellipsoidal base for the celestial body, since not all planets(for example) are spheres.
+	BoundingSphere m_outerSphere;
 
-	float m_maxNoise = 0.0f; //Maximum extent of noise
+	virtual void CreateRandTexture(CommandListAllocatorPair* pCmdListAllocPair) = 0;
+	virtual void CreateTileMap(ID3D12Device* device) = 0;
+	void GetTileMapTiling(ID3D12Device* device);
 
-
-	void CreateRandTexture(ID3D12Device* device);
-	void CreateTileMap(ID3D12Device* device);
+	virtual void CreateVertexBuffer(CommandListAllocatorPair* pCmdListAllocPair) = 0;
 public:
-	CelestialBody(CelestialBodyClass cbClass, float radius, XMFLOAT3 initialPos, ID3D12Device* device, XMFLOAT4 camPos = {});
-	~CelestialBody();
+	virtual ~CelestialBody() {};
 	TreeNode* GetRoot();
 	BOOL Intersects(BoundingBox aabb);
+	virtual void FillRenderCmdList(XMVECTOR camPos, ID3D12GraphicsCommandList* commandList) = 0;
 };

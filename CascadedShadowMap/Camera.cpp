@@ -2,7 +2,7 @@
 #include "DescriptorHeaps.h"
 
 Camera::Camera() {
-	m_position = { 0.0f,0.0f,-1.0f };
+	m_position = { 0.0f,0.0f,-1.0f }; //Set again in OnInit
 	m_right = { 1.0f,0.0f,0.0f };
 	m_up = { 0.0f,1.0f,0.0f };
 	m_direction = { 0.0f,0.0f,1.0f };
@@ -15,7 +15,7 @@ Camera::~Camera() {
 }
 
 void Camera::OnInit(float fovY, float aspectRatio, float nearZ, float farZ) {
-	m_position = { 0.0f,0.0f,0.0f };
+	m_position = { 0.0f,0.0f,-1.0f };
 	m_right = { 1.0f,0.0f,0.0f };
 	m_up = { 0.0f,1.0f,0.0f };
 	m_direction = { 0.0f,0.0f,1.0f };
@@ -140,19 +140,36 @@ XMVECTOR Camera::GetScaledDirection() {
 	return m_direction * m_farZ;
 }
 
+BoundingFrustum Camera::GetFrustum() {
+	BoundingFrustum ret(m_projectionMatrix);
+	ret.Transform(ret, m_viewMatrix);
+	return ret;
+}
+
 FrustumRays Camera::GetRays() {
 	FrustumRays ret;
 	ret.d = m_farZ;
 	ret.o = m_position;
 	float l = tan(m_fovY / 2);
-	ret.v1 = XMVector3Normalize(m_direction + l * m_up);
-	ret.v2 = XMVector3Normalize(m_direction - l * m_up);
-	l *= m_aspectRatio;
-	ret.v3 = XMVector3Normalize(m_direction + l * m_right);
-	ret.v4 = XMVector3Normalize(m_direction - l * m_right);
+
+	XMVECTOR d1 = l * m_up + l * m_aspectRatio * m_right;
+	XMVECTOR d2 = l * m_up - l * m_aspectRatio * m_right;
+
+	ret.v1 = XMVector3Normalize(m_direction + d1);
+	ret.v2 = XMVector3Normalize(m_direction - d1);
+	//l *= m_aspectRatio;
+	ret.v3 = XMVector3Normalize(m_direction + d2);
+	ret.v4 = XMVector3Normalize(m_direction - d2);
 	return ret;
 }
 
 float Camera::GetTanFOVH() {
 	return tan(0.5f * m_fovY) * m_aspectRatio;
+}
+
+XMMATRIX Camera::GetOrientation() {
+	const XMVECTOR e4({0.0f,0.0f,0.0f,1.0f});
+	XMMATRIX ret = XMMATRIX(m_right, m_up, m_direction, e4);
+	//return XMMatrixInverse(NULL,ret);
+	return XMMatrixIdentity();
 }

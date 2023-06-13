@@ -80,71 +80,6 @@ void TreeNode::IncreaseCount(BoundingBox bounds) {
 	}
 }
 
-void CelestialBody::CreateRandTexture(ID3D12Device* device) {
-	D3D12_RESOURCE_DESC desc = {
-			D3D12_RESOURCE_DIMENSION_TEXTURE3D,
-			0,
-			16,
-			16,
-			16,
-			1,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			{1,0},
-			D3D12_TEXTURE_LAYOUT_UNKNOWN
-	};
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
-	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&m_randTexture)));
-	HandlePair handles = DescriptorHeaps::BatchHandles(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	m_randTextureSRV = handles.gpuHandle;
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {
-		DXGI_FORMAT_R32G32B32_FLOAT,
-		D3D12_SRV_DIMENSION_TEXTURE3D,
-		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING
-	};
-	srvDesc.Texture3D = {
-		0,
-		1,
-		0.0f
-	};
-	device->CreateShaderResourceView(m_randTexture.Get(), &srvDesc, handles.cpuHandle);
-
-	ComPtr<ID3D12Resource> uploadBuffer;
-	D3D12_PLACED_SUBRESOURCE_FOOTPRINT placedFootprint;
-	UINT numRows;
-	UINT64 rowSize;
-	UINT64 totalSize;
-	device->GetCopyableFootprints(
-		&desc,
-		0,
-		1,
-		0,
-		&placedFootprint,
-		&numRows,
-		&rowSize,
-		&totalSize
-	);
-
-	desc = {
-			D3D12_RESOURCE_DIMENSION_BUFFER,
-			0,
-			Pad256(rowSize) * 16,
-			1,
-			1,
-			1,
-			DXGI_FORMAT_UNKNOWN,
-			{1,0},
-			D3D12_TEXTURE_LAYOUT_ROW_MAJOR
-	};
-
-	heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer)));
-
-
-
-
-
-}
-
 void CelestialBody::CreateTileMap(ID3D12Device* device) {
 	D3D12_RESOURCE_DESC desc = {
 			D3D12_RESOURCE_DIMENSION_TEXTURE3D,
@@ -152,13 +87,12 @@ void CelestialBody::CreateTileMap(ID3D12Device* device) {
 			2048,
 			2048,
 			2048,
-			1,
+			7,
 			DXGI_FORMAT_R32G32B32A32_FLOAT,
 			{1,0},
-			D3D12_TEXTURE_LAYOUT_UNKNOWN
+			D3D12_TEXTURE_LAYOUT_64KB_UNDEFINED_SWIZZLE
 	};
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
-	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&m_randTexture)));
+	ThrowIfFailed(device->CreateReservedResource(&desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&m_tileMap)));
 	HandlePair handles = DescriptorHeaps::BatchHandles(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	m_randTextureSRV = handles.gpuHandle;
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {
@@ -167,7 +101,7 @@ void CelestialBody::CreateTileMap(ID3D12Device* device) {
 		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING
 	};
 	srvDesc.Texture3D = {
-		0,
+		10,
 		1,
 		0.0f
 	};
@@ -201,15 +135,21 @@ void CelestialBody::CreateTileMap(ID3D12Device* device) {
 			D3D12_TEXTURE_LAYOUT_ROW_MAJOR
 	};
 
-	heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
 	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer)));
 }
 
-CelestialBody::CelestialBody(CelestialBodyClass cbClass, float radius, XMFLOAT3 initialPos, ID3D12Device* device, XMFLOAT4 camPos) : m_class(cbClass), m_innerSphere(initialPos,radius*0.5f), m_outerSphere(initialPos,radius+1.0f) {
-	m_root = new TreeNode(m_outerSphere,this);
+void CelestialBody::GetTileMapTiling(ID3D12Device* device) {
+	UINT numTilesForResource = 0;
+	D3D12_PACKED_MIP_INFO packedMipDesc = {};
+	D3D12_TILE_SHAPE standardTileShape = {};
+	UINT numSubresourceTilings = 7;
+	D3D12_SUBRESOURCE_TILING pSubresourceTilingsForNonPackedMips[7];
+	device->GetResourceTiling(m_tileMap.Get(), &numTilesForResource, &packedMipDesc, &standardTileShape, &numSubresourceTilings, 0, pSubresourceTilingsForNonPackedMips);
+	printf("Num subresource tilings retreived: %d\n", numSubresourceTilings);
+	printf("Standard tile shape: %d %d %d\n", standardTileShape.WidthInTexels, standardTileShape.HeightInTexels, standardTileShape.DepthInTexels);
+	printf("Num packed : %d\nNum tiles for packed: %d\n", packedMipDesc.NumPackedMips, packedMipDesc.NumTilesForPackedMips);
 }
-
-CelestialBody::~CelestialBody() {}
 
 TreeNode* CelestialBody::GetRoot() {
 	return m_root;

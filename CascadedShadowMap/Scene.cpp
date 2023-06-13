@@ -65,7 +65,7 @@ void Scene::Load(ID3D12GraphicsCommandList* commandList) {
 	m_objects[0]->Load(m_device.Get());
 	objInstances.pObject = m_objects[0];
 	objInstances.nInstances = 1;
-	LoadRandomInstances(m_device.Get(), &objInstances, 1, (RandomGenerator*)this, 0.0f);
+	LoadRandomInstances(m_device.Get(), &objInstances, 0, (RandomGenerator*)this, 0.0f);
 
 	m_materials[0].objects.push_back(objInstances);
 }

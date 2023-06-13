@@ -47,6 +47,10 @@ public:
 	XMVECTOR GetScaledDirection();
 	XMVECTOR GetPositionVECTOR();
 
+	BoundingFrustum GetFrustum();
+	XMMATRIX GetOrientation(); //Returns change-of-basis matrix from <e1,e2,e3> -> <m_right,m_up,m_direction>
+
+	//Rays bounding the frustum
 	FrustumRays GetRays();
 	float GetTanFOVH();
 };

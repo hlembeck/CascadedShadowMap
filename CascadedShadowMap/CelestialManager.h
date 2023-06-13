@@ -1,5 +1,5 @@
 #pragma once
-#include "CelestialBody.h"
+#include "Planet.h"
 #include "PipelineObjects.h"
 
 struct WorldTile {
@@ -12,45 +12,46 @@ class CelestialManager;
 /*
 Manages which tiles are resident. All nodes in m_nodes contain at least one renderable tile.
 */
-class TileManager :
-	public virtual CommandListAllocatorPair,
-	public virtual PipelineObjects
-{
-	friend class CelestialManager;
-	//Texture for tiles of samples
-	ComPtr<ID3D12Resource> m_tiles;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_uavHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_srvHandle;
-	XMUINT4* m_freeTiles;
-	UINT m_freeTilesEnd = 4096;
-
-	//CBuffer for storing mappings into the tiles
-	ComPtr<ID3D12Resource> m_cbuffer;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_cbvHandle;
-
-	TreeNode** m_nodes = nullptr;
-	UINT m_heapSize = 0;
-	void Swap(UINT i, UINT j);
-	void Pop();
-
-	XMUINT4 PopTile(); //Guaranteed called only when m_freeTilesEnd > 0.
-	void PushTile(XMUINT4 tile);
-public:
-	TileManager();
-	~TileManager(); //Deletes all TreeNodes, starting from the leaf nodes in m_nodes. Thus ~CelestialBody should NOT delete its root node
-
-	void Push(TreeNode* node); //Push a root node
-	void Update(XMFLOAT3 camPos);
-	void InitTiles(std::vector<WorldTile>& worldMatrices); //Assumes that cam pos is (0,0,0).
-	void GenerateTiles(const std::vector<WorldTile>& worldMatrices);
-	void CreateTextureAndCBuffer();
-
-	void PrintWeights();
-	void PrintTiles();
-};
+//class TileManager :
+//	public virtual CommandListAllocatorPair,
+//	public virtual PipelineObjects
+//{
+//	friend class CelestialManager;
+//	//Texture for tiles of samples
+//	ComPtr<ID3D12Resource> m_tiles;
+//	D3D12_GPU_DESCRIPTOR_HANDLE m_uavHandle;
+//	D3D12_GPU_DESCRIPTOR_HANDLE m_srvHandle;
+//	XMUINT4* m_freeTiles;
+//	UINT m_freeTilesEnd = 4096;
+//
+//	//CBuffer for storing mappings into the tiles
+//	ComPtr<ID3D12Resource> m_cbuffer;
+//	D3D12_GPU_DESCRIPTOR_HANDLE m_cbvHandle;
+//
+//	TreeNode** m_nodes = nullptr;
+//	UINT m_heapSize = 0;
+//	void Swap(UINT i, UINT j);
+//	void Pop();
+//
+//	XMUINT4 PopTile(); //Guaranteed called only when m_freeTilesEnd > 0.
+//	void PushTile(XMUINT4 tile);
+//public:
+//	TileManager();
+//	~TileManager(); //Deletes all TreeNodes, starting from the leaf nodes in m_nodes. Thus ~CelestialBody should NOT delete its root node
+//
+//	void Push(TreeNode* node); //Push a root node
+//	void Update(XMFLOAT3 camPos);
+//	void InitTiles(std::vector<WorldTile>& worldMatrices); //Assumes that cam pos is (0,0,0).
+//	void GenerateTiles(const std::vector<WorldTile>& worldMatrices);
+//	void CreateTextureAndCBuffer();
+//
+//	void PrintWeights();
+//	void PrintTiles();
+//};
 
 class CelestialManager :
-	public virtual TileManager
+	public virtual CommandListAllocatorPair,
+	public virtual PipelineObjects
 {
 	CelestialBody** m_celestialBodies;
 	UINT m_maxBodies;
@@ -75,7 +76,7 @@ class CelestialManager :
 public:
 	CelestialManager(UINT numBodies = 64);
 	~CelestialManager();
-	void Init(ID3D12Device* device);
+	void Init(BoundingFrustum viewFrustum);
 
-	void Render(ID3D12GraphicsCommandList* commandList);
+	void Render(ID3D12GraphicsCommandList* commandList, FrustumRays rays);
 };

@@ -34,6 +34,10 @@ void DXBase::GetAdapter(IDXGIFactory1* pFactory, IDXGIAdapter1** ppAdapter) {
     *ppAdapter = NULL;
 }
 
+ID3D12Device* DXBase::GetDevice() {
+    return m_device.Get();
+}
+
 WindowInterface::WindowInterface(UINT width, UINT height) : m_width(width), m_height(height) {
     m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
@@ -192,4 +196,20 @@ void CommandListAllocatorPair::WaitForQueue() {
 
 void CommandListAllocatorPair::Init() {
     CreateCommandList();
+}
+
+void CommandListAllocatorPair::ResetPair(ID3D12PipelineState* pso) {
+    m_commandAllocator->Reset();
+    m_commandList->Reset(m_commandAllocator.Get(),pso);
+}
+
+void CommandListAllocatorPair::ExecuteAndWait() {
+    m_commandList->Close();
+    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
+    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    WaitForQueue();
+}
+
+ID3D12GraphicsCommandList* CommandListAllocatorPair::GetCommandList() {
+    return m_commandList.Get();
 }

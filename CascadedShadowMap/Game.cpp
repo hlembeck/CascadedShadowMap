@@ -20,7 +20,7 @@ void Game::OnInit() {
     BasicShadow::Load(2048);
     CreateCommandList();
 
-    CelestialManager::Init(m_device.Get());
+    CelestialManager::Init(Camera::GetFrustum());
     m_commandList->Reset(m_commandAllocator.Get(), NULL);
     Scene::Load(m_commandList.Get());
     m_commandList->Close();
@@ -56,10 +56,11 @@ void Game::DrawFinal() {
 
 
         //Draw terrain.
-        m_commandList->SetPipelineState(PipelineObjects::m_dcMainPSO.Get());
-        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-        CelestialManager::Render(m_commandList.Get());
-        m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        //m_commandList->SetPipelineState(PipelineObjects::m_dcMainPSO.Get());
+        //m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+        m_commandList->SetPipelineState(PipelineObjects::m_planetRenderPSO.Get());
+        CelestialManager::Render(m_commandList.Get(), Camera::GetRays());
+        //m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
         m_commandList->SetGraphicsRootDescriptorTable(2, BasicShadow::m_cbvHandle);
@@ -67,8 +68,8 @@ void Game::DrawFinal() {
         //m_commandList->SetGraphicsRootDescriptorTable(3, TerrainClipmap::m_srvHandle);
         
         //Draw normal
-        m_commandList->SetPipelineState(m_simplePSO.Get());
-        Scene::Draw(m_commandList.Get());
+        //m_commandList->SetPipelineState(m_simplePSO.Get());
+        //Scene::Draw(m_commandList.Get());
 
         //Setup for presenting
         resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -112,15 +113,20 @@ void Game::OnRender() {
     Camera::UpdateConstants();
     BasicShadow::UpdateProjections();
 
-    ResetCommandList(PipelineObjects::m_shadowPSO.Get());
+    /*ResetCommandList(PipelineObjects::m_shadowPSO.Get());
     m_commandList->SetGraphicsRootSignature(m_gRootSignature.Get());
     ID3D12DescriptorHeap* pHeaps[] = { DescriptorHeaps::GetCBVHeap() };
     m_commandList->SetDescriptorHeaps(1, pHeaps);
-    BasicShadow::DrawShadow(m_commandList.Get(), this);
+    BasicShadow::DrawShadow(m_commandList.Get(), this);*/
 
+    ResetCommandList(NULL);
+    m_commandList->SetGraphicsRootSignature(m_gRootSignature.Get());
+    ID3D12DescriptorHeap* pHeaps[] = { DescriptorHeaps::GetCBVHeap() };
+    m_commandList->SetDescriptorHeaps(1, pHeaps);
     m_commandList->RSSetViewports(1, &(DXWindowBase::m_viewport));
     m_commandList->RSSetScissorRects(1, &(DXWindowBase::m_scissorRect));
     m_commandList->SetGraphicsRootConstantBufferView(0, Camera::GetConstantsAddress());
+    m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     DrawFinal();
     ThrowIfFailed(m_commandList->Close());
     // Execute the command list.

@@ -12,6 +12,8 @@ protected:
 	void CreateDevice(IDXGIFactory4* factory);
 	ComPtr<ID3D12Device> m_device;
 	ComPtr<ID3D12CommandQueue> m_commandQueue;
+public:
+	ID3D12Device* GetDevice();
 };
 
 class WindowInterface : public virtual AspectRatio {
@@ -64,7 +66,7 @@ private:
 	ComPtr<ID3D12Fence> m_fence;
 };
 
-class CommandListAllocatorPair :public virtual DXBase {
+class CommandListAllocatorPair : public virtual DXBase {
 	void CreateCommandList();
 protected:
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
@@ -74,4 +76,7 @@ protected:
 	void WaitForQueue();
 public:
 	void Init();
+	void ResetPair(ID3D12PipelineState* pso = nullptr);
+	void ExecuteAndWait();
+	ID3D12GraphicsCommandList* GetCommandList();
 };

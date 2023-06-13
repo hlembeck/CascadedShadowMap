@@ -46,9 +46,6 @@
     <Filter Include="Source Files\Scene\Dynamic">
       <UniqueIdentifier>{f59b6eb5-8a5d-42e8-a378-16232b770313}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Scene\Static\Terrain">
-      <UniqueIdentifier>{1a230b1d-7533-4081-9f6b-b2a630079d1d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Terrain">
       <UniqueIdentifier>{bbd4d959-0ba5-469b-91af-777bf4cce32e}</UniqueIdentifier>
     </Filter>
@@ -78,9 +75,6 @@
     </Filter>
     <Filter Include="Header Files\Scene\Static">
       <UniqueIdentifier>{11db89c8-1a00-4ecd-8416-361a7607d234}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Scene\Static\Terrain">
-      <UniqueIdentifier>{26e9da57-4c42-496c-ad9b-75509e565afa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Scene\Celestial Bodies">
       <UniqueIdentifier>{0a748fe8-faa2-45fe-b727-b87065a10170}</UniqueIdentifier>
@@ -132,17 +126,17 @@
     <ClInclude Include="BasicShadow.h">
       <Filter>Header Files\Player</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainHeightmap.h">
-      <Filter>Header Files\Scene\Static\Terrain</Filter>
+    <ClInclude Include="TextureManagement.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Planet.h">
+      <Filter>Header Files\Scene\Celestial Bodies</Filter>
     </ClInclude>
     <ClInclude Include="CelestialBody.h">
       <Filter>Header Files\Scene\Celestial Bodies</Filter>
     </ClInclude>
     <ClInclude Include="CelestialManager.h">
       <Filter>Header Files\Scene\Celestial Bodies</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureManagement.h">
-      <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -182,17 +176,17 @@
     <ClCompile Include="BasicShadow.cpp">
       <Filter>Source Files\Player</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainHeightmap.cpp">
-      <Filter>Source Files\Scene\Static\Terrain</Filter>
+    <ClCompile Include="TextureManagement.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Planet.cpp">
+      <Filter>Source Files\Scene\Celestial Bodies</Filter>
     </ClCompile>
     <ClCompile Include="CelestialBody.cpp">
       <Filter>Source Files\Scene\Celestial Bodies</Filter>
     </ClCompile>
     <ClCompile Include="CelestialManager.cpp">
       <Filter>Source Files\Scene\Celestial Bodies</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureManagement.cpp">
-      <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -214,9 +208,6 @@
     <CustomBuild Include="BasicShadow.hlsl">
       <Filter>Resource Files\Shadow</Filter>
     </CustomBuild>
-    <CustomBuild Include="ClipmapUpsample.hlsl">
-      <Filter>Resource Files\Terrain</Filter>
-    </CustomBuild>
     <CustomBuild Include="BlockTerrainGen.hlsl">
       <Filter>Resource Files\Terrain</Filter>
     </CustomBuild>
@@ -226,15 +217,20 @@
     <CustomBuild Include="BasicShadowTerrain.hlsl">
       <Filter>Resource Files\Shadow</Filter>
     </CustomBuild>
-    <CustomBuild Include="PlanetGen.hlsl" />
     <CustomBuild Include="DCMain.hlsl">
       <Filter>Resource Files\Terrain</Filter>
     </CustomBuild>
     <CustomBuild Include="DCSampleGen.hlsl">
       <Filter>Resource Files\Terrain</Filter>
     </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Geometries.geom" />
+    <CustomBuild Include="PlanetRender.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PlanetTiler.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PlanetIntersection.hlsl">
+      <Filter>Resource Files\Terrain</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
