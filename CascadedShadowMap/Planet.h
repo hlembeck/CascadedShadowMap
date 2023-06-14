@@ -39,6 +39,7 @@ class Planet : public CelestialBody {
 	XMFLOAT3 m_position;
 
 	PlanetParams m_planetParams;
+	PlanetIntersectionParams m_intersectionParams;
 	ComPtr<ID3D12Resource> m_planetParamsBuffer;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_planetParamsHandle;
 

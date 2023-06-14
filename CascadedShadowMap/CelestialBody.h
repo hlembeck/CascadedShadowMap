@@ -60,6 +60,7 @@ protected:
 
 	virtual void CreateVertexBuffer(CommandListAllocatorPair* pCmdListAllocPair) = 0;
 public:
+	ComPtr<ID3D12Resource> m_intersectionParamsBuffer;
 	virtual ~CelestialBody() {};
 	TreeNode* GetRoot();
 	BOOL Intersects(BoundingBox aabb);

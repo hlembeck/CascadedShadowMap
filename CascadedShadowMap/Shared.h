@@ -200,3 +200,8 @@ struct FrustumRays {
     XMVECTOR v4;
     float d;
 };
+
+struct PlanetIntersectionParams {
+    XMMATRIX worldMatrix;
+    XMMATRIX invWorldMatrix;
+};

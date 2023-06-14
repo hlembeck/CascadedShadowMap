@@ -358,7 +358,7 @@ void CelestialManager::Init(BoundingFrustum viewFrustum) {
 
 	//CreateUploadBuffer();
 	//CreateVertexBuffer();
-	m_celestialBodies[m_numBodies++] = (CelestialBody*)(new Planet((CommandListAllocatorPair*)this, 10.0f, { 0.0f,0.0f,-10.0f }, viewFrustum));
+	m_celestialBodies[m_numBodies++] = (CelestialBody*)(new Planet((CommandListAllocatorPair*)this, 10.0f, { 0.0f,0.0f,20.0f }, viewFrustum));
 
 	//TileManager::Push(m_celestialBodies[0]->GetRoot());
 	//TileManager::InitTiles(m_worldTiles);
@@ -391,4 +391,8 @@ void CelestialManager::Render(ID3D12GraphicsCommandList* commandList, FrustumRay
 	////	m_constantBuffer->Unmap(0, nullptr);
 	////	commandList->DrawInstanced(23064, n, 0, 0);
 	////}
+}
+
+D3D12_GPU_VIRTUAL_ADDRESS CelestialManager::GetIntersectionParams() {
+	return m_celestialBodies[0]->m_intersectionParamsBuffer->GetGPUVirtualAddress();
 }

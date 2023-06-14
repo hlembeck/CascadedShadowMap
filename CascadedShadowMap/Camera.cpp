@@ -15,7 +15,7 @@ Camera::~Camera() {
 }
 
 void Camera::OnInit(float fovY, float aspectRatio, float nearZ, float farZ) {
-	m_position = { 0.0f,0.0f,-1.0f };
+	m_position = { 0.0f,0.0f,-5.0f };
 	m_right = { 1.0f,0.0f,0.0f };
 	m_up = { 0.0f,1.0f,0.0f };
 	m_direction = { 0.0f,0.0f,1.0f };
@@ -84,6 +84,12 @@ void Camera::Move(XMVECTOR dist) { //Movement on y-axis is "wrong": pressing spa
 	m_position += XMVector3Transform(dist, mat);
 	UpdateView();
 }
+
+void Camera::SetPosition(XMVECTOR pos) { //Movement on y-axis is "wrong": pressing space moves in "up" direction of camera, not of world
+	m_position = pos;
+	UpdateView();
+}
+
 
 void Camera::Pitch(float angle) {
 	XMMATRIX rotationMatrix = XMMatrixRotationAxis(m_right, angle);

@@ -79,4 +79,7 @@ public:
 	void Init(BoundingFrustum viewFrustum);
 
 	void Render(ID3D12GraphicsCommandList* commandList, FrustumRays rays);
+
+	//Will return array in the future
+	D3D12_GPU_VIRTUAL_ADDRESS GetIntersectionParams();
 };

@@ -20,10 +20,11 @@ void RootSignatures::LoadComputeRS() {
         0
     };
 
-    CD3DX12_ROOT_PARAMETER rootParameters[3] = {};
-    rootParameters[0].InitAsConstantBufferView(0);
-    rootParameters[1].InitAsDescriptorTable(1, &range);
-    rootParameters[2].InitAsDescriptorTable(1, &uavRange);
+    CD3DX12_ROOT_PARAMETER rootParameters[4] = {};
+    rootParameters[0].InitAsConstants(4, 0);
+    rootParameters[1].InitAsConstantBufferView(1);
+    rootParameters[2].InitAsDescriptorTable(1, &range);
+    rootParameters[3].InitAsDescriptorTable(1, &uavRange);
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc(_countof(rootParameters), rootParameters, 0, NULL, rootSignatureFlags);
     ComPtr<ID3DBlob> rootSignatureBlob;

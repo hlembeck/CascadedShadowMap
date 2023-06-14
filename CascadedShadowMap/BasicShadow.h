@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 class BasicShadow : 
-	public virtual DXBase,
+	public virtual CommandListAllocatorPair,
 	public virtual AspectRatio,
 	private virtual CameraView 
 {

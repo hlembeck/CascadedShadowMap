@@ -32,6 +32,7 @@ public:
 
 	void SetLens(float fovY, float ar, float zn, float zf);
 	void Move(XMVECTOR dist);
+	void SetPosition(XMVECTOR pos);
 
 	void Pitch(float angle);
 	void RotateWorldY(float angle);

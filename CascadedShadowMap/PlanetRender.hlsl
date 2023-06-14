@@ -1,4 +1,5 @@
 #include "BasicDirectionalLight.hlsl"
+#include "Noise.hlsl"
 
 cbuffer CameraConstants : register(b0) {
 	matrix viewProj;
@@ -184,46 +185,9 @@ static const float4x4 cubeFaces[6] = {
 //	return ret;
 //}
 
-// hash based 3d value noise
-// Found on https://stackoverflow.com/questions/15628039/simplex-noise-shader
-// function taken from https://www.shadertoy.com/view/XslGRr
-// Created by inigo quilez - iq/2013
-// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-// ported from GLSL to HLSL
-//START SOURCE
-float hash(float n)
-{
-	return frac(sin(n) * 43758.5453);
-}
-
-float noise(float3 x)
-{
-	// The noise function returns a value in the range -1.0f -> 1.0f
-
-	float3 p = floor(x);
-	float3 f = frac(x);
-
-	f = f * f * (3.0 - 2.0 * f);
-	float n = p.x + p.y * 57.0 + 113.0 * p.z;
-
-	return lerp(lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
-		lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
-		lerp(lerp(hash(n + 113.0), hash(n + 114.0), f.x),
-			lerp(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
-}
-//END SOURCE
-
 
 float2 GetCoordinates(uint instance) {
 	return float2(instance % 8, instance / 8);
-}
-
-float3 GetNormal(float3 pos) {
-	float e = 0.0001f;
-
-
-
-	return pos;
 }
 
 VSOutput VS(float4 input : POSITION, uint instance : SV_InstanceID) {
@@ -235,15 +199,15 @@ VSOutput VS(float4 input : POSITION, uint instance : SV_InstanceID) {
 	ret.pos = mul(ret.pos, cubeFaces[instance % 6]);
 	ret.pos.xyz = normalize(ret.pos.xyz);
 	ret.pos = mul(ret.pos, orientation);
-	ret.n = float4(ret.pos.xyz, 0.0f);
+	ret.n = float4(GetNormal(ret.pos.xyz), 0.0f);
 
 
 
-	float height = noise(10.0f*unit + ret.pos.xyz * 5.0f);
-	ret.pos.xyz *= 1.0f + 0.25f * height;
+	/*float height = 0.7 * noise(ret.pos.xyz * 4.0f) + 0.15f * noise(8.0f * ret.pos.yzx) + 0.15f * noise(8.0f * ret.pos.zxy);
+	ret.pos.xyz *= 1.0f + 0.25f * height;*/
+	float height = GetHeight(ret.pos.xyz);
+	ret.pos.xyz *= height;
 	ret.height = height;
-
-	//float3 texCoords = (ret.pos.xyz+unit)*0.5f;
 
 	ret.pos = mul(ret.pos, worldMatrix);
 	//ret.n = normalize(mul(ret.n, worldMatrix)); //Not necessary here, but in general should be done.
@@ -254,6 +218,7 @@ VSOutput VS(float4 input : POSITION, uint instance : SV_InstanceID) {
 
 float4 PS(VSOutput input) : SV_TARGET{
 	const float4 unit = {1.0f,0.0f,1.0f,0.0f};
-	return unit * input.height;
-	//return GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, viewDirection, viewPosition);
+	//return unit * (input.height-0.5f);
+	//return input.n;
+	return GetDirectionalLightFactor(input.wPos, -LIGHTDIR, input.n, viewDirection, viewPosition);
 }

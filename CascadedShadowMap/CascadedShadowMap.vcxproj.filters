@@ -232,5 +232,8 @@
     <CustomBuild Include="PlanetIntersection.hlsl">
       <Filter>Resource Files\Terrain</Filter>
     </CustomBuild>
+    <CustomBuild Include="Noise.hlsl">
+      <Filter>Resource Files\Shared</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

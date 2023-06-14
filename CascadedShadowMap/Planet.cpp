@@ -210,6 +210,9 @@ void Planet::CreatePlanetParams(ID3D12Device* device) {
 	m_planetParams.worldMatrix = XMMatrixTranspose(XMMatrixMultiply(XMMatrixScaling(m_radius,m_radius,m_radius),XMMatrixTranslation(m_position.x,m_position.y,m_position.z)));
 	m_planetParams.orientation = XMMatrixIdentity();
 
+	m_intersectionParams.worldMatrix = m_planetParams.worldMatrix;
+	m_intersectionParams.invWorldMatrix = XMMatrixTranspose(XMMatrixInverse(NULL,XMMatrixMultiply(XMMatrixScaling(m_radius, m_radius, m_radius), XMMatrixTranslation(m_position.x, m_position.y, m_position.z))));
+
 	D3D12_RESOURCE_DESC desc = {
 		D3D12_RESOURCE_DIMENSION_BUFFER,
 		0,
@@ -224,6 +227,9 @@ void Planet::CreatePlanetParams(ID3D12Device* device) {
 	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
 	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&m_planetParamsBuffer)));
 
+	desc.Width = Pad256(sizeof(PlanetIntersectionParams));
+	ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&m_intersectionParamsBuffer)));
+
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {
 		m_planetParamsBuffer->GetGPUVirtualAddress(),
 		Pad256(sizeof(PlanetParams))
@@ -237,6 +243,10 @@ void Planet::CreatePlanetParams(ID3D12Device* device) {
 	m_planetParamsBuffer->Map(0, &readRange, (void**)&pData);
 	memcpy(pData, &m_planetParams, sizeof(PlanetParams));
 	m_planetParamsBuffer->Unmap(0, nullptr);
+
+	m_intersectionParamsBuffer->Map(0, &readRange, (void**)&pData);
+	memcpy(pData, &m_intersectionParams, sizeof(PlanetIntersectionParams));
+	m_intersectionParamsBuffer->Unmap(0, nullptr);
 }
 
 void Planet::CreateTileMap(ID3D12Device* device) {

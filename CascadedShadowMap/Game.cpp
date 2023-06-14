@@ -41,6 +41,7 @@ void Game::OnUpdate() {
         Player::RotateWorldY(((cursorPos.x - m_cursorPos.x) / m_mouseScaleFactor) * elapsedTime);
         SetCursorPos(m_cursorPos.x, m_cursorPos.y);
     }
+    Player::ApplyObjIntersectionsToPosition(CelestialManager::GetIntersectionParams());
     //Terrain::UpdateRoots(GetTerrainLODViewParams());
 }
 
