@@ -13,3 +13,5 @@ One might also take the outer sphere to be defined by the planet's atmosphere, a
 The planet can be roughly rendered with no LOD by passing a cube to the graphics pipeline, normalizing its points, and then applying noise and transforming to world coordinates.
 Applying LOD using this scheme may be difficult if the input cube is not oriented to the camera position, so a transform is done to align the cube so that its close face is orthogonal to the vector from the camera position to the planet center.
 Given this orientation, LOD can be applied by determining a rectangular region of each face to be rendered, and applying a sort of persistent grid to this region. The interested reader may see the code in **Planet.cpp** and **PlanetTiler.hlsl**.
+
+Determining the rectangles to render is done based on the view cone (not frustum, for simplicity). First, for each bounding ray of the cone, determine the points of intersection with the outer sphere.
